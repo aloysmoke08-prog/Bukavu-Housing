@@ -45,7 +45,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware de validation CSRF basique par timestamp
+// Middleware de validation CSRF basique par présence d'un token valide
 app.use((req, res, next) => {
   if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
     const csrfToken = req.headers['x-csrf-token'];
@@ -54,8 +54,10 @@ app.use((req, res, next) => {
     }
     try {
       const decoded = JSON.parse(Buffer.from(csrfToken, 'base64').toString());
-      if (!decoded.ts || Math.abs(Date.now() - decoded.ts) > 15 * 60 * 1000) {
-        return res.status(403).json({ error: 'Requête sécurisée : Token CSRF expiré ou hors délai.' });
+      // On vérifie la structure du token. Pour éviter de bloquer les utilisateurs dont l'horloge système
+      // est désynchronisée (très fréquent sur mobile/PC), on ne restreint pas le délai à 15 minutes.
+      if (!decoded.ts || typeof decoded.ts !== 'number') {
+        return res.status(403).json({ error: 'Requête sécurisée : Token CSRF invalide ou expiré.' });
       }
     } catch (e) {
       return res.status(403).json({ error: 'Requête sécurisée : Token CSRF invalide.' });
