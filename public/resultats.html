@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Bukavu Housing — Résultats de Recherche</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- Leaflet.js for Interactive Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+    <script>
+      // Initialisation immédiate du Dark Mode pour éviter le flash blanc
+      const isDarkMode = localStorage.getItem('theme') === 'dark';
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-800 dark:bg-surface-dark dark:text-slate-200 font-sans min-h-screen pb-24 transition-colors duration-300">
+    
+    <!-- En-tête -->
+    <header class="w-full top-0 sticky z-40 bg-white dark:bg-card-dark shadow-sm flex justify-between items-center px-6 py-4 transition-colors duration-300">
+      <div class="flex items-center gap-2">
+        <button onclick="history.back()" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 transition-all">
+          <span class="material-symbols-outlined font-bold text-base flex">arrow_back</span>
+        </button>
+        <span class="text-xl font-poppins font-bold text-primary dark:text-white cursor-pointer" onclick="window.location.href='accueil.html'">Bukavu Housing</span>
+        <span class="text-xs text-primary dark:text-amber-500 font-bold bg-primary/10 dark:bg-amber-500/10 px-3 py-1 rounded-full ml-1">Bukavu</span>
+      </div>
+    </header>
+
+    <!-- Zone de recherche & Filtres -->
+    <div class="px-4 py-4 bg-white dark:bg-card-dark border-b border-slate-100 dark:border-slate-800/80 sticky top-[69px] z-30 space-y-4 transition-colors duration-300">
+      <div class="relative group z-30">
+        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <span class="material-symbols-outlined text-slate-400">search</span>
+        </div>
+        <input
+          id="search-input"
+          class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-primary dark:focus:ring-amber-500 focus:border-transparent text-sm text-slate-800 dark:text-slate-200 outline-none transition-all duration-300 shadow-sm"
+          placeholder="Rechercher par quartier ou titre (ex: Ibanda, Bel air)..."
+          type="text"
+          autocomplete="off"
+        />
+        
+        <!-- Dropdown d'autocomplétion -->
+        <div id="autocomplete-list" class="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-h-64 overflow-y-auto hidden">
+          <!-- Rempli par JavaScript -->
+        </div>
+      </div>
+
+      <!-- Filtres rapides scrollables -->
+      <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-1">
+        <button
+          onclick="ouvrirModalFiltres()"
+          class="flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-transform"
+        >
+          <span class="material-symbols-outlined text-[16px]">tune</span>
+          Filtres
+        </button>
+        <div class="h-5 w-px bg-slate-200 dark:bg-slate-800"></div>
+        
+        <!-- Filtre Prix Rapide -->
+        <select
+          id="filtre-prix"
+          onchange="appliquerFiltres()"
+          class="px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none cursor-pointer"
+        >
+          <option value="">Tous les prix</option>
+          <option value="0-50">0 – 50 USD</option>
+          <option value="50-150">50 – 150 USD</option>
+          <option value="150-500">150 – 500 USD</option>
+          <option value="500+">+ 500 USD</option>
+        </select>
+
+        <!-- Filtre Type Rapide -->
+        <select
+          id="filtre-type"
+          onchange="appliquerFiltres()"
+          class="px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none cursor-pointer"
+        >
+          <option value="">Tous types</option>
+          <option value="appartement">Appartement</option>
+          <option value="maison">Maison</option>
+          <option value="studio">Studio</option>
+          <option value="chambre">Chambre</option>
+        </select>
+
+        <!-- Filtre Chambres Rapide -->
+        <select
+          id="filtre-chambres"
+          onchange="appliquerFiltres()"
+          class="px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none cursor-pointer"
+        >
+          <option value="">Chambres</option>
+          <option value="1">1 chambre</option>
+          <option value="2">2 chambres</option>
+          <option value="3">3+ chambres</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- En-tête résultats, tri et layouts -->
+    <div class="px-4 py-4 flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <h2 class="font-poppins font-bold text-lg text-slate-900 dark:text-white" id="titre-resultats">
+          Logements à Bukavu
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold" id="nb-resultats">
+          Chargement...
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Tri -->
+        <select
+          id="tri-select"
+          onchange="appliquerFiltres()"
+          class="px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none"
+        >
+          <option value="recent">Plus récent</option>
+          <option value="populaire">Plus populaire</option>
+          <option value="prix-asc">Prix : croissant</option>
+          <option value="prix-desc">Prix : décroissant</option>
+        </select>
+        <!-- Toggle Layout -->
+        <button onclick="toggleLayout('grid')" id="layout-grid-btn" class="p-1.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg active:scale-95 transition-transform" title="Vue grille">
+          <span class="material-symbols-outlined text-[18px] font-bold flex">grid_view</span>
+        </button>
+        <button onclick="toggleLayout('list')" id="layout-list-btn" class="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg active:scale-95 transition-transform" title="Vue liste">
+          <span class="material-symbols-outlined text-[18px] flex">format_list_bulleted</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Liste de Logements -->
+    <main class="px-4 pb-24" id="liste-logements-container">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="liste-logements">
+        <!-- Skeletons -->
+        <div class="animate-pulse bg-white dark:bg-card-dark rounded-2xl h-80 border border-slate-100 dark:border-slate-800/80"></div>
+        <div class="animate-pulse bg-white dark:bg-card-dark rounded-2xl h-80 border border-slate-100 dark:border-slate-800/80"></div>
+        <div class="animate-pulse bg-white dark:bg-card-dark rounded-2xl h-80 border border-slate-100 dark:border-slate-800/80"></div>
+      </div>
+    </main>
+
+    <!-- Zone vide -->
+    <div id="etat-vide" class="hidden flex flex-col items-center justify-center py-20 text-center px-8">
+      <div class="bg-primary/5 dark:bg-slate-800/50 p-6 rounded-full mb-6 text-primary dark:text-amber-500">
+        <span class="material-symbols-outlined text-[64px] flex">search_off</span>
+      </div>
+      <h3 class="font-poppins font-bold text-xl text-slate-900 dark:text-white mb-2">Aucun résultat trouvé</h3>
+      <p class="text-sm text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
+        Aucun logement disponible ne correspond à vos filtres ou termes de recherche.
+      </p>
+      <button
+        onclick="reinitialiserFiltres()"
+        class="mt-6 px-8 py-3 bg-primary dark:bg-amber-500 text-white dark:text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider shadow-md hover:opacity-90 active:scale-95 transition-all"
+      >
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+    <!-- Bouton carte flottant -->
+    <button
+      onclick="toggleMapModal()"
+      class="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-2 px-6 py-3 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-transform uppercase tracking-widest"
+    >
+      <span class="material-symbols-outlined text-[18px]">map</span> 
+      <span>Voir la carte</span>
+    </button>
+
+    <!-- Modal Carte Interactive (Leaflet.js) -->
+    <div id="map-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 w-full max-w-4xl h-[80vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col relative transition-colors duration-300">
+        <header class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary dark:text-amber-500">map</span>
+            <h3 class="font-poppins font-bold text-lg text-slate-900 dark:text-white">Résultats sur la carte</h3>
+          </div>
+          <button onclick="toggleMapModal()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 transition-transform">
+            <span class="material-symbols-outlined flex items-center justify-center">close</span>
+          </button>
+        </header>
+        <div id="map-container" class="flex-1 w-full h-full bg-slate-100 dark:bg-slate-950"></div>
+      </div>
+    </div>
+
+    <!-- Navigation fixe bottom -->
+    <nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-white dark:bg-card-dark shadow-[0_-4px_12px_rgba(0,0,0,0.06)] border-t border-slate-100 dark:border-slate-800 rounded-t-2xl transition-colors">
+      <a href="accueil.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] font-semibold">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center text-primary dark:text-amber-500 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[10px] font-bold">Recherche</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[10px] font-semibold">Publier</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1 relative">
+        <span class="material-symbols-outlined">mail</span>
+        <span class="text-[10px] font-semibold">Messages</span>
+        <span id="unread-messages-badge" class="hidden absolute top-0.5 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-semibold">Profil</span>
+      </a>
+    </nav>
+
+    <!-- JS Logic -->
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      let tousLogements = [];
+      let filtrésLogements = [];
+      let viewMode = 'grid'; // grid | list
+
+      const quartiersBukavu = [
+        'Ibanda', 'Nyalukemba', 'Panzi', 'Ndendere', 'Essence', 
+        'Kadutu', 'Nkafu', 'Cimpunda', 'Funu', 'Bagira', 'Kasha', 'Nyakavogo'
+      ];
+
+      const NEIGHBORHOOD_COORDS = {
+        "ibanda": [-2.5028, 28.8647],
+        "nyalukemba": [-2.5090, 28.8750],
+        "panzi": [-2.5400, 28.8450],
+        "ndendere": [-2.5080, 28.8610],
+        "essence": [-2.5150, 28.8480],
+        "kadutu": [-2.5130, 28.8410],
+        "nkafu": [-2.5030, 28.8350],
+        "cimpunda": [-2.5180, 28.8370],
+        "funu": [-2.5110, 28.8450],
+        "bagira": [-2.4760, 28.8250],
+        "kasha": [-2.4900, 28.8050],
+        "nyakavogo": [-2.4820, 28.8210]
+      };
+
+      // Recupérer paramètres d'URL
+      const params = new URLSearchParams(window.location.search);
+      const rechercheInitiale = params.get("q") || "";
+      if (rechercheInitiale) {
+        document.getElementById("search-input").value = rechercheInitiale;
+      }
+
+      // Autocomplétion
+      const searchInput = document.getElementById("search-input");
+      const autocompleteList = document.getElementById("autocomplete-list");
+
+      searchInput.addEventListener("input", () => {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) {
+          autocompleteList.classList.add("hidden");
+          appliquerFiltres();
+          return;
+        }
+
+        const matches = quartiersBukavu.filter(q => q.toLowerCase().includes(query));
+        if (matches.length === 0) {
+          autocompleteList.classList.add("hidden");
+          appliquerFiltres();
+          return;
+        }
+
+        autocompleteList.innerHTML = matches.map(m => `
+          <div onclick="selectNeighborhood('${m}')" class="px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer text-sm font-semibold flex items-center gap-3 text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-all duration-200">
+            <span class="material-symbols-outlined text-amber-500 text-lg">location_on</span>
+            <span>${m}</span>
+          </div>
+        `).join('');
+
+        autocompleteList.classList.remove("hidden");
+        appliquerFiltres();
+      });
+
+      window.selectNeighborhood = function(name) {
+        searchInput.value = name;
+        autocompleteList.classList.add("hidden");
+        appliquerFiltres();
+      };
+
+      // Cacher dropdown autocomplete
+      document.addEventListener("click", (e) => {
+        if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+          autocompleteList.classList.add("hidden");
+        }
+      });
+
+      function creerCarte(log, id) {
+        const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF") + "/mois";
+        const img = log.images && log.images[0] ? log.images[0] : "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+        
+        if (viewMode === 'list') {
+          return `
+            <article onclick="window.location.href='details.html?id=${id}'"
+              class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800/80 active:scale-[0.98] transition-transform cursor-pointer flex gap-4 p-4 hover:shadow-md hover:-translate-y-0.5 duration-300">
+              <div class="relative w-28 h-24 md:w-36 md:h-28 rounded-2xl overflow-hidden flex-none">
+                <img alt="${log.titre}" class="w-full h-full object-cover" src="${img}" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+                <button onclick="event.stopPropagation(); toggleFavori('${id}', this)"
+                  class="favoris-btn absolute top-2 right-2 w-8 h-8 bg-white/90 dark:bg-slate-800/90 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm active:scale-90 transition-transform hover:text-red-500" data-id="${id}">
+                  <span class="material-symbols-outlined fav-icon text-[16px]">favorite</span>
+                </button>
+              </div>
+              <div class="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center gap-1.5 mb-1 flex-wrap">
+                    <span class="bg-primary/5 text-primary dark:bg-slate-800 dark:text-amber-500 font-bold text-[8px] px-2 py-0.5 rounded uppercase tracking-wider">${log.type || ""}</span>
+                    <span class="bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300 font-bold text-[8px] px-2 py-0.5 rounded uppercase tracking-wider">${log.quartier}</span>
+                  </div>
+                  <h3 class="font-poppins font-bold text-sm text-slate-900 dark:text-white truncate">${log.titre}</h3>
+                  <p class="text-amber-600 font-bold text-xs mt-0.5">${prix}</p>
+                </div>
+                <div class="flex items-center gap-3 border-t border-slate-100 dark:border-slate-800 pt-2 text-slate-500 dark:text-slate-400 text-[10px]">
+                  <span class="flex items-center gap-0.5 font-bold"><span class="material-symbols-outlined text-[14px] text-primary dark:text-amber-500">bed</span> ${log.chambres || 1} Ch.</span>
+                  <span class="flex items-center gap-0.5 font-bold"><span class="material-symbols-outlined text-[14px] text-primary dark:text-amber-500">square_foot</span> ${log.superficie || '?'} m²</span>
+                  <span class="flex items-center gap-0.5 font-bold"><span class="material-symbols-outlined text-[14px] text-primary dark:text-amber-500">visibility</span> ${log.vues || 0} vues</span>
+                </div>
+              </div>
+            </article>`;
+        } else {
+          return `
+            <article onclick="window.location.href='details.html?id=${id}'"
+              class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-slate-800/80 active:scale-[0.98] transition-transform cursor-pointer flex flex-col justify-between h-full hover:shadow-lg hover:-translate-y-0.5 duration-300">
+              <div class="relative aspect-[4/3] w-full overflow-hidden">
+                <img alt="${log.titre}" class="w-full h-full object-cover" src="${img}" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+                <div class="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-3 py-1.5 rounded-xl font-bold text-xs text-primary dark:text-amber-500 shadow-md">${prix}</div>
+                <button onclick="event.stopPropagation(); toggleFavori('${id}', this)"
+                  class="favoris-btn absolute top-4 right-4 w-10 h-10 bg-white/90 dark:bg-slate-800/90 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm active:scale-90 transition-transform hover:text-red-500" data-id="${id}">
+                  <span class="material-symbols-outlined fav-icon text-[18px]">favorite</span>
+                </button>
+              </div>
+              <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                <div class="space-y-1.5">
+                  <div class="flex gap-2">
+                    <span class="bg-primary/5 text-primary dark:bg-slate-800 dark:text-amber-500 font-bold text-[9px] px-2.5 py-1 rounded-md uppercase tracking-wider">${log.type || "Logement"}</span>
+                    <span class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 font-bold text-[9px] px-2.5 py-1 rounded-md uppercase tracking-wider">${log.quartier || "Bukavu"}</span>
+                  </div>
+                  <h3 class="font-poppins font-bold text-base text-slate-900 dark:text-white truncate leading-snug">${log.titre}</h3>
+                  <div class="flex items-center text-slate-500 dark:text-slate-400 gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-amber-500">location_on</span>
+                    <span class="text-xs font-semibold">${log.quartier}, Bukavu</span>
+                  </div>
+                </div>
+                <div class="flex gap-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[18px] text-primary dark:text-amber-500">bed</span>
+                    <span class="text-xs font-bold">${log.chambres || 1} Ch.</span>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[18px] text-primary dark:text-amber-500">square_foot</span>
+                    <span class="text-xs font-bold">${log.superficie || "?"} m²</span>
+                  </div>
+                  <div class="flex items-center gap-1 ml-auto text-[11px] text-slate-400">
+                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                    <span>${log.vues || 0} vues</span>
+                  </div>
+                </div>
+              </div>
+            </article>`;
+        }
+      }
+
+      function afficherLogements(liste) {
+        const container = document.getElementById("liste-logements");
+        const containerParent = document.getElementById("liste-logements-container");
+        const vide = document.getElementById("etat-vide");
+
+        document.getElementById("nb-resultats").textContent = 
+          `${liste.length} résultat${liste.length > 1 ? "s" : ""} trouvé${liste.length > 1 ? "s" : ""}`;
+
+        if (liste.length === 0) {
+          containerParent.classList.add("hidden");
+          vide.classList.remove("hidden");
+          return;
+        }
+
+        vide.classList.add("hidden");
+        containerParent.classList.remove("hidden");
+        container.innerHTML = "";
+
+        // Ajuster grid/flex selon layout
+        if (viewMode === 'list') {
+          container.className = "flex flex-col gap-4";
+        } else {
+          container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6";
+        }
+
+        liste.forEach(log => {
+          container.innerHTML += creerCarte(log, log.id);
+        });
+
+        // Appliquer status des favoris
+        liste.forEach(async (log) => {
+          try {
+            const { favori } = await Users.isFavori(log.id);
+            const btn = document.querySelector(`.favoris-btn[data-id="${log.id}"]`);
+            if (btn) {
+              const icon = btn.querySelector(".fav-icon");
+              icon.style.fontVariationSettings = favori ? "'FILL' 1" : "'FILL' 0";
+              icon.style.color = favori ? "#ba1a1a" : "";
+            }
+          } catch {}
+        });
+      }
+
+      async function chargerLogements() {
+        try {
+          const { logements } = await Logements.lister({ limit: 100 });
+          tousLogements = logements || [];
+          appliquerFiltres();
+        } catch (e) {
+          console.error(e);
+          document.getElementById("liste-logements").innerHTML = `
+            <div class="col-span-full text-center py-12 text-red-500 font-bold text-sm">
+              Erreur lors du chargement des logements.
+            </div>`;
+        }
+      }
+
+      window.appliquerFiltres = function() {
+        const recherche = document.getElementById("search-input").value.toLowerCase().trim();
+        const prixFiltre = document.getElementById("filtre-prix").value;
+        const typeFiltre = document.getElementById("filtre-type").value;
+        const chFiltre = document.getElementById("filtre-chambres").value;
+        const tri = document.getElementById("tri-select").value;
+
+        let resultat = tousLogements.filter(log => {
+          if (recherche) {
+            const matchTxt = `${log.titre} ${log.quartier} ${log.description || ""}`.toLowerCase();
+            if (!matchTxt.includes(recherche)) return false;
+          }
+          if (typeFiltre && log.type !== typeFiltre) return false;
+          
+          if (chFiltre) {
+            const ch = parseInt(chFiltre);
+            if (chFiltre === "3" && log.chambres < 3) return false;
+            if (chFiltre !== "3" && log.chambres !== ch) return false;
+          }
+
+          if (prixFiltre) {
+            if (prixFiltre === "500+") {
+              if (log.prix < 500) return false;
+            } else {
+              const [min, max] = prixFiltre.split("-").map(Number);
+              if (log.prix < min || log.prix > max) return false;
+            }
+          }
+          return true;
+        });
+
+        // Appliquer Tri
+        if (tri === "recent") {
+          resultat.sort((a, b) => new Date(b.cree_le) - new Date(a.cree_le));
+        } else if (tri === "populaire") {
+          resultat.sort((a, b) => (b.vues || 0) - (a.vues || 0));
+        } else if (tri === "prix-asc") {
+          resultat.sort((a, b) => a.prix - b.prix);
+        } else if (tri === "prix-desc") {
+          resultat.sort((a, b) => b.prix - a.prix);
+        }
+
+        filtrésLogements = resultat;
+
+        const q = document.getElementById("search-input").value;
+        document.getElementById("titre-resultats").textContent = q
+          ? `Résultats pour "${q}"`
+          : "Logements à Bukavu";
+
+        afficherLogements(resultat);
+      };
+
+      window.reinitialiserFiltres = function() {
+        document.getElementById("search-input").value = "";
+        document.getElementById("filtre-prix").value = "";
+        document.getElementById("filtre-type").value = "";
+        document.getElementById("filtre-chambres").value = "";
+        appliquerFiltres();
+      };
+
+      // Toggle layout
+      window.toggleLayout = function(mode) {
+        viewMode = mode;
+        const gridBtn = document.getElementById("layout-grid-btn");
+        const listBtn = document.getElementById("layout-list-btn");
+
+        if (mode === 'list') {
+          listBtn.className = "p-1.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg active:scale-95 transition-transform";
+          gridBtn.className = "p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg active:scale-95 transition-transform";
+        } else {
+          gridBtn.className = "p-1.5 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white rounded-lg active:scale-95 transition-transform";
+          listBtn.className = "p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg active:scale-95 transition-transform";
+        }
+
+        afficherLogements(filtrésLogements);
+      };
+
+      // Toggle favori
+      window.toggleFavori = async function(id, btn) {
+        const icon = btn.querySelector(".fav-icon");
+        try {
+          const { favori } = await Users.toggleFavori(id);
+          icon.style.fontVariationSettings = favori ? "'FILL' 1" : "'FILL' 0";
+          icon.style.color = favori ? "#ba1a1a" : "";
+          
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: 'success',
+            title: favori ? 'Ajouté aux favoris !' : 'Retiré des favoris.'
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      // Gestion de la carte
+      let map = null;
+      let mapMarkers = [];
+
+      window.toggleMapModal = function() {
+        const modal = document.getElementById("map-modal");
+        const isOpen = !modal.classList.contains("hidden");
+
+        if (isOpen) {
+          modal.classList.add("hidden");
+        } else {
+          modal.classList.remove("hidden");
+          setTimeout(() => {
+            initMap();
+          }, 200);
+        }
+      };
+
+      function initMap() {
+        const bukavuCenter = [-2.5028, 28.8647];
+        
+        if (!map) {
+          map = L.map('map-container').setView(bukavuCenter, 13);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map);
+        } else {
+          map.invalidateSize();
+        }
+
+        // Clean anciens marqueurs
+        mapMarkers.forEach(m => map.removeLayer(m));
+        mapMarkers = [];
+
+        if (filtrésLogements.length > 0) {
+          filtrésLogements.forEach(log => {
+            const q = (log.quartier || "ibanda").toLowerCase().trim();
+            const center = NEIGHBORHOOD_COORDS[q] || bukavuCenter;
+
+            // Petit décalage aléatoire
+            const lat = center[0] + (Math.random() - 0.5) * 0.005;
+            const lng = center[1] + (Math.random() - 0.5) * 0.005;
+
+            const img = log.images && log.images[0] ? log.images[0] : "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+            const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF") + "/mois";
+
+            const marker = L.marker([lat, lng]).addTo(map);
+            const popupContent = `
+              <div class="w-48 font-sans p-1">
+                <img src="${img}" class="w-full h-24 object-cover rounded-xl mb-2" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+                <h4 class="font-bold text-sm text-slate-900 truncate mb-0.5">${log.titre}</h4>
+                <p class="text-amber-600 font-bold text-xs mb-1">${prix}</p>
+                <p class="text-slate-500 text-[10px] mb-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">location_on</span>${log.quartier}</p>
+                <a href="details.html?id=${log.id}" class="block text-center bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 text-xs font-bold py-1.5 rounded-lg hover:opacity-90 transition-opacity">Voir les détails</a>
+              </div>
+            `;
+            marker.bindPopup(popupContent);
+            mapMarkers.push(marker);
+          });
+        }
+      }
+
+      // Modal complet filtres avancés avec SweetAlert2
+      window.ouvrirModalFiltres = function() {
+        Swal.fire({
+          title: 'Filtres de recherche avancés',
+          html: `
+            <div class="space-y-4 text-left p-2">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Type de logement</label>
+                <select id="adv-type" class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm outline-none bg-white">
+                  <option value="">Tous les types</option>
+                  <option value="appartement" ${document.getElementById("filtre-type").value === 'appartement' ? 'selected' : ''}>Appartement</option>
+                  <option value="maison" ${document.getElementById("filtre-type").value === 'maison' ? 'selected' : ''}>Maison</option>
+                  <option value="studio" ${document.getElementById("filtre-type").value === 'studio' ? 'selected' : ''}>Studio</option>
+                  <option value="chambre" ${document.getElementById("filtre-type").value === 'chambre' ? 'selected' : ''}>Chambre</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Budget de loyer</label>
+                <select id="adv-prix" class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm outline-none bg-white">
+                  <option value="">Tous les budgets</option>
+                  <option value="0-50" ${document.getElementById("filtre-prix").value === '0-50' ? 'selected' : ''}>0 – 50 USD</option>
+                  <option value="50-150" ${document.getElementById("filtre-prix").value === '50-150' ? 'selected' : ''}>50 – 150 USD</option>
+                  <option value="150-500" ${document.getElementById("filtre-prix").value === '150-500' ? 'selected' : ''}>150 – 500 USD</option>
+                  <option value="500+" ${document.getElementById("filtre-prix").value === '500+' ? 'selected' : ''}>+ 500 USD</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Nombre de chambres</label>
+                <select id="adv-chambres" class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm outline-none bg-white">
+                  <option value="">Peu importe</option>
+                  <option value="1" ${document.getElementById("filtre-chambres").value === '1' ? 'selected' : ''}>1 chambre</option>
+                  <option value="2" ${document.getElementById("filtre-chambres").value === '2' ? 'selected' : ''}>2 chambres</option>
+                  <option value="3" ${document.getElementById("filtre-chambres").value === '3' ? 'selected' : ''}>3 chambres ou plus</option>
+                </select>
+              </div>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonText: 'Appliquer les filtres',
+          cancelButtonText: 'Annuler',
+          confirmButtonColor: '#1a3a5c',
+          customClass: {
+            popup: 'rounded-3xl',
+            confirmButton: 'rounded-xl text-xs uppercase tracking-wider px-6 py-3',
+            cancelButton: 'rounded-xl text-xs uppercase tracking-wider px-6 py-3 bg-slate-100 text-slate-600',
+          }
+        }).then((res) => {
+          if (res.isConfirmed) {
+            // Synchroniser vers les selects principaux
+            document.getElementById("filtre-type").value = document.getElementById("adv-type").value;
+            document.getElementById("filtre-prix").value = document.getElementById("adv-prix").value;
+            document.getElementById("filtre-chambres").value = document.getElementById("adv-chambres").value;
+            appliquerFiltres();
+          }
+        });
+      };
+
+      chargerLogements();
+      verifierMessagesNonLus();
+
+      async function verifierMessagesNonLus() {
+        try {
+          const messages = await Users.messages();
+          const userObj = Auth.currentUser();
+          const unread = messages.some(m => !m.lu && m.destinataire.id === userObj.id);
+          document.getElementById("unread-messages-badge").classList.toggle("hidden", !unread);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="fr" class="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Bukavu Housing — Publier un logement</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+    <!-- Image Compression JS -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+      .upload-zone {
+        border: 2px dashed #cbd5e1;
+        transition: all 0.2s ease;
+      }
+      .upload-zone.drag-over {
+        border-color: #1a3a5c;
+        background: #f1f5f9;
+      }
+      .dark .upload-zone.drag-over {
+        border-color: #f59e0b;
+        background: #1e293b;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800 dark:bg-surface-dark dark:text-slate-200 font-sans pb-24 transition-colors duration-300">
+    
+    <header class="bg-white dark:bg-card-dark sticky top-0 z-40 shadow-sm flex items-center gap-3 px-6 py-4 transition-colors">
+      <button onclick="history.back()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors">
+        <span class="material-symbols-outlined text-xl">arrow_back</span>
+      </button>
+      <h1 id="page-title" class="font-poppins font-bold text-lg text-primary dark:text-white flex-1">Publier un logement</h1>
+      <span class="text-xs bg-primary/10 text-primary dark:bg-amber-500/10 dark:text-amber-500 px-3 py-1 rounded-full font-bold">Bukavu</span>
+    </header>
+
+    <main class="max-w-lg mx-auto px-4 py-6 space-y-6">
+      
+      <!-- Barre d'étapes (masquée en mode édition) -->
+      <div id="step-indicator" class="flex items-center gap-2">
+        <div id="step-dot-1" class="w-8 h-8 rounded-full bg-primary text-white dark:bg-amber-500 flex items-center justify-center text-sm font-bold shadow-sm">1</div>
+        <div class="flex-1 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div id="step-bar" class="h-1 bg-primary dark:bg-amber-500 rounded-full transition-all" style="width: 33%"></div>
+        </div>
+        <div id="step-dot-2" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center text-sm font-bold">2</div>
+        <div class="flex-1 h-1 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+        <div id="step-dot-3" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center text-sm font-bold">3</div>
+      </div>
+
+      <!-- Étape 1 : Informations de base & Contacts -->
+      <div id="etape-1" class="space-y-5">
+        <h2 class="font-poppins font-bold text-xl text-slate-900 dark:text-white">Informations & Contacts</h2>
+
+        <div class="space-y-4 bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Titre de l'annonce *</label>
+            <input id="titre" type="text" maxlength="80" placeholder="Ex: Bel appartement avec vue sur le lac Kivu" required
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Type *</label>
+              <select id="type" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none">
+                <option value="">-- Choisir --</option>
+                <option value="appartement">Appartement</option>
+                <option value="maison">Maison</option>
+                <option value="studio">Studio</option>
+                <option value="chambre">Chambre</option>
+                <option value="villa">Villa</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Quartier *</label>
+              <select id="quartier" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none">
+                <option value="">-- Choisir --</option>
+                <optgroup label="Commune d'Ibanda">
+                  <option value="Ibanda Centre">Ibanda Centre</option>
+                  <option value="Nyalukemba">Nyalukemba</option>
+                  <option value="Panzi">Panzi</option>
+                  <option value="Ciriri">Ciriri</option>
+                  <option value="Ndendere">Ndendere</option>
+                  <option value="Essence">Essence</option>
+                </optgroup>
+                <optgroup label="Commune de Kadutu">
+                  <option value="Kadutu Centre">Kadutu Centre</option>
+                  <option value="Nkafu">Nkafu</option>
+                  <option value="Cimpunda">Cimpunda</option>
+                  <option value="Funu">Funu</option>
+                </optgroup>
+                <optgroup label="Commune de Bagira">
+                  <option value="Bagira Centre">Bagira Centre</option>
+                  <option value="Kasha">Kasha</option>
+                  <option value="Nyakavogo">Nyakavogo</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Adresse précise</label>
+            <input id="adresse" type="text" placeholder="Ex: Av. du Lac, n°14, Ibanda"
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+          </div>
+        </div>
+
+        <h3 class="font-poppins font-bold text-base text-slate-900 dark:text-white pt-2">Coordonnées de Contact</h3>
+        <div class="space-y-4 bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Numéro WhatsApp de contact *</label>
+            <input id="contact-whatsapp" type="tel" placeholder="+243XXXXXXXXX" required
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Téléphone de contact alternatif</label>
+            <input id="contact-tel-alt" type="tel" placeholder="+243XXXXXXXXX"
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Email de contact</label>
+            <input id="contact-email" type="email" placeholder="contact@bukavuhousing.com"
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <input id="contact-public" type="checkbox" checked class="rounded text-primary dark:text-amber-500 focus:ring-primary dark:focus:ring-amber-500 border-slate-300 dark:border-slate-700" />
+            <label for="contact-public" class="text-xs font-semibold text-slate-700 dark:text-slate-300">Afficher mes coordonnées publiquement sur l'annonce</label>
+          </div>
+        </div>
+
+        <button onclick="allerEtape(2)" class="w-full bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all">
+          Suivant <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+      </div>
+
+      <!-- Étape 2 : Caractéristiques & Prix -->
+      <div id="etape-2" class="space-y-5 hidden">
+        <h2 class="font-poppins font-bold text-xl text-slate-900 dark:text-white">Caractéristiques & Prix</h2>
+
+        <div class="space-y-4 bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 text-center">Chambres *</label>
+              <input id="chambres" type="number" min="0" value="1" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none text-center" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 text-center">S. de Bains</label>
+              <input id="bains" type="number" min="0" value="1" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none text-center" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 text-center">Superficie m²</label>
+              <input id="superficie" type="number" min="0" placeholder="Ex: 80" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none text-center" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Prix mensuel *</label>
+            <div class="flex gap-2">
+              <input id="prix" type="number" min="0" placeholder="Ex: 350" required
+                class="flex-1 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              <select id="devise" class="border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none">
+                <option value="USD">USD ($)</option>
+                <option value="CDF">CDF (FC)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Lien vidéo de visite virtuelle (YouTube, optionnel)</label>
+            <input id="video-url" type="url" placeholder="https://www.youtube.com/watch?v=..."
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Description détaillée *</label>
+            <textarea id="description" rows="4" maxlength="500" required placeholder="Description des atouts du logement..."
+              class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none resize-none"></textarea>
+            <p class="text-[10px] text-slate-400 text-right mt-1"><span id="desc-count">0</span>/500 caractères</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Équipements inclus</label>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="eau" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Eau courante
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="electricite" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Électricité
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="wifi" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> WiFi
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="parking" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Parking sécurisé
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="gardien" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Gardien
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="cuisine" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Cuisine équipée
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="meuble" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Meublé
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" value="terrasse" class="equip-cb rounded text-primary dark:text-amber-500 focus:ring-primary border-slate-300 dark:border-slate-700" /> Terrasse / Balcon
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="allerEtape(1)" class="flex-1 border border-primary dark:border-slate-700 text-primary dark:text-slate-300 py-3 rounded-xl font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors">
+            Retour
+          </button>
+          <button onclick="allerEtape(3)" class="flex-1 bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all">
+            Suivant <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Étape 3 : Photos & Envoi -->
+      <div id="etape-3" class="space-y-5 hidden">
+        <h2 class="font-poppins font-bold text-xl text-slate-900 dark:text-white">Photos du logement</h2>
+        
+        <div class="bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+          <div id="upload-zone" class="upload-zone rounded-2xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary dark:hover:border-amber-500 transition-colors"
+            ondragover="handleDragOverZone(event)" ondragleave="handleDragLeaveZone(event)" ondrop="handleDropZone(event)" onclick="document.getElementById('file-input').click()">
+            
+            <span class="material-symbols-outlined text-5xl text-slate-400 dark:text-slate-500">add_photo_alternate</span>
+            <p class="text-sm font-semibold text-slate-600 dark:text-slate-400 text-center">Glissez-déposez vos photos ou cliquez ici</p>
+            <p class="text-[10px] text-slate-400 text-center">Maximum 8 photos • Glisser pour réordonner</p>
+            
+            <input id="file-input" type="file" accept="image/*" multiple class="hidden" onchange="handleFilesSelection(this.files)" />
+          </div>
+
+          <!-- Grille de prévisualisation -->
+          <div id="preview-photos" class="grid grid-cols-4 gap-2 hidden"></div>
+
+          <!-- Barre de chargement/compression -->
+          <div id="upload-progress" class="hidden">
+            <div class="flex justify-between text-xs text-slate-500 mb-1">
+              <span id="progress-status">Optimisation et compression des images...</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div id="progress-bar" class="h-full bg-primary dark:bg-amber-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button id="btn-etape3-retour" onclick="allerEtape(2)" class="flex-1 border border-primary dark:border-slate-700 text-primary dark:text-slate-300 py-3 rounded-xl font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-850 transition-colors">
+            Retour
+          </button>
+          <button onclick="publierLogement()" id="btn-publier" class="flex-1 bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px]">publish</span>
+            <span id="btn-publier-label">Publier</span>
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Navigation fixe bottom -->
+    <nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-white dark:bg-card-dark shadow-[0_-4px_12px_rgba(0,0,0,0.06)] border-t border-slate-100 dark:border-slate-800 rounded-t-2xl transition-colors">
+      <a href="accueil.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] font-semibold">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[10px] font-semibold">Recherche</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center text-primary dark:text-amber-500 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[10px] font-bold">Publier</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1 relative">
+        <span class="material-symbols-outlined">mail</span>
+        <span class="text-[10px] font-semibold">Messages</span>
+        <span id="unread-messages-badge" class="hidden absolute top-0.5 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-semibold">Profil</span>
+      </a>
+    </nav>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      // Dark Mode
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+
+      // Lire les query params
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get("edit");
+      let editMode = !!editId;
+      let existingImages = []; // stocker en mode édition
+
+      // Stocker les fichiers sélectionnés : { id, file, previewUrl, compressed }
+      let filesSelectionnes = [];
+
+      // Compteur caractères description
+      document.getElementById("description").addEventListener("input", function() {
+        document.getElementById("desc-count").textContent = this.value.length;
+      });
+
+      // Remplir informations par défaut de l'utilisateur
+      async function prefillUserContacts() {
+        if (editMode) {
+          // Mode Édition
+          document.getElementById("page-title").textContent = "Modifier le logement";
+          document.getElementById("btn-publier-label").textContent = "Enregistrer";
+          document.getElementById("step-indicator").classList.add("hidden");
+          document.getElementById("btn-etape3-retour").classList.add("hidden");
+
+          Swal.fire({
+            title: 'Chargement...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+
+          try {
+            const log = await Logements.detail(editId);
+            
+            // Étape 1
+            document.getElementById("titre").value = log.titre || "";
+            document.getElementById("type").value = log.type || "";
+            document.getElementById("quartier").value = log.quartier || "";
+            document.getElementById("adresse").value = log.adresse || "";
+            document.getElementById("contact-whatsapp").value = log.whatsapp_contact || "";
+            document.getElementById("contact-tel-alt").value = log.telephone_contact || "";
+            document.getElementById("contact-email").value = log.email_contact || "";
+            document.getElementById("contact-public").checked = log.contact_public !== false;
+
+            // Étape 2
+            document.getElementById("chambres").value = log.chambres || 1;
+            document.getElementById("bains").value = log.bains || 0;
+            document.getElementById("superficie").value = log.superficie || "";
+            document.getElementById("prix").value = log.prix || "";
+            document.getElementById("devise").value = log.devise || "USD";
+            document.getElementById("video-url").value = log.video_url || "";
+            document.getElementById("description").value = log.description || "";
+            document.getElementById("desc-count").textContent = (log.description || "").length;
+
+            // Checkboxes équipements
+            const equip = log.equipements || [];
+            document.querySelectorAll(".equip-cb").forEach(cb => {
+              cb.checked = equip.includes(cb.value);
+            });
+
+            // Sauvegarder les images existantes
+            existingImages = log.images || [];
+
+            // Afficher dans l'étape 3 les images existantes comme prévisualisations non re-ordonnables simples
+            // ou donner la possibilité de re-uploader
+            if (existingImages.length > 0) {
+              const preview = document.getElementById("preview-photos");
+              preview.classList.remove("hidden");
+              existingImages.forEach((url, i) => {
+                preview.innerHTML += `
+                  <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200">
+                    <img src="${url}" class="w-full h-full object-cover"/>
+                    ${i === 0 ? '<span class="absolute bottom-1 left-1 bg-amber-500 text-white text-[9px] px-1 py-0.5 rounded font-bold">Actuelle</span>' : ""}
+                  </div>`;
+              });
+            }
+
+            Swal.close();
+          } catch (err) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erreur',
+              text: 'Logement introuvable.'
+            }).then(() => { history.back(); });
+          }
+        } else {
+          // Mode Publication - Pré-remplir depuis le profil de l'utilisateur
+          try {
+            const { user } = await Users.profil();
+            document.getElementById("contact-whatsapp").value = user.whatsapp || "";
+            document.getElementById("contact-tel-alt").value = user.telephone2 || "";
+            document.getElementById("contact-email").value = user.email_contact || user.email || "";
+          } catch (err) {
+            console.error("Erreur pré-remplissage contact:", err);
+          }
+        }
+      }
+      prefillUserContacts();
+      verifierMessagesNonLus();
+
+      async function verifierMessagesNonLus() {
+        try {
+          const messages = await Users.messages();
+          const userObj = Auth.currentUser();
+          const unread = messages.some(m => !m.lu && m.destinataire.id === userObj.id);
+          document.getElementById("unread-messages-badge").classList.toggle("hidden", !unread);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Gestionnaire d'étapes
+      window.allerEtape = function(n) {
+        if (n === 2) {
+          const titre = document.getElementById("titre").value.trim();
+          const type = document.getElementById("type").value;
+          const quartier = document.getElementById("quartier").value;
+          const wa = document.getElementById("contact-whatsapp").value.trim();
+
+          if (!titre || !type || !quartier || !wa) {
+            return Swal.fire({
+              icon: 'warning',
+              title: 'Champs requis',
+              text: 'Remplissez le titre, le type, le quartier et votre numéro WhatsApp.'
+            });
+          }
+        }
+        if (n === 3) {
+          const prix = document.getElementById("prix").value;
+          const chambres = document.getElementById("chambres").value;
+          const desc = document.getElementById("description").value.trim();
+
+          if (!prix || !chambres || !desc) {
+            return Swal.fire({
+              icon: 'warning',
+              title: 'Champs requis',
+              text: 'Remplissez le prix, le nombre de chambres et la description.'
+            });
+          }
+        }
+
+        [1, 2, 3].forEach((i) => {
+          document.getElementById(`etape-${i}`).classList.toggle("hidden", i !== n);
+          const dot = document.getElementById(`step-dot-${i}`);
+          if (dot) {
+            if (i <= n) dot.className = "w-8 h-8 rounded-full bg-primary text-white dark:bg-amber-500 flex items-center justify-center text-sm font-bold shadow-sm";
+            else dot.className = "w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center text-sm font-bold";
+          }
+        });
+        
+        if (document.getElementById("step-bar")) {
+          document.getElementById("step-bar").style.width = `${(n / 3) * 100}%`;
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      // Drag and Drop Zone effects
+      window.handleDragOverZone = function(e) {
+        e.preventDefault();
+        document.getElementById("upload-zone").classList.add("drag-over");
+      };
+
+      window.handleDragLeaveZone = function(e) {
+        document.getElementById("upload-zone").classList.remove("drag-over");
+      };
+
+      window.handleDropZone = function(e) {
+        e.preventDefault();
+        document.getElementById("upload-zone").classList.remove("drag-over");
+        if (e.dataTransfer.files) {
+          handleFilesSelection(e.dataTransfer.files);
+        }
+      };
+
+      // Gérer la sélection des fichiers et compression client via browser-image-compression
+      window.handleFilesSelection = async function(files) {
+        const options = {
+          maxSizeMB: 1, // compresse à max 1 Mo
+          maxWidthOrHeight: 1200,
+          useWebWorker: true
+        };
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true
+        });
+
+        document.getElementById("upload-progress").classList.remove("hidden");
+        document.getElementById("progress-bar").style.width = "20%";
+        document.getElementById("progress-pct").textContent = "20%";
+
+        for (const file of Array.from(files)) {
+          if (filesSelectionnes.length >= 8) {
+            Toast.fire({ icon: 'warning', title: 'Maximum 8 photos autorisées.' });
+            break;
+          }
+
+          // Aperçu local immédiat
+          const previewUrl = URL.createObjectURL(file);
+          const itemIdx = filesSelectionnes.push({
+            id: Math.random().toString(36).substring(2),
+            file: file,
+            previewUrl: previewUrl,
+            compressed: file // fallback
+          }) - 1;
+
+          renderPreviews();
+
+          // Compression asynchrone en tâche de fond
+          if (typeof imageCompression !== 'undefined') {
+            try {
+              const compressedFile = await imageCompression(file, options);
+              filesSelectionnes[itemIdx].compressed = compressedFile;
+            } catch (err) {
+              console.error("Erreur compression:", err);
+            }
+          }
+        }
+
+        document.getElementById("progress-bar").style.width = "100%";
+        document.getElementById("progress-pct").textContent = "Terminé";
+        setTimeout(() => {
+          document.getElementById("upload-progress").classList.add("hidden");
+        }, 1000);
+      };
+
+      // Rendre les previews
+      function renderPreviews() {
+        const preview = document.getElementById("preview-photos");
+        preview.innerHTML = "";
+        
+        if (editMode && existingImages.length > 0) {
+          // Afficher d'abord les images actuelles en mode édition
+          existingImages.forEach((url, i) => {
+            preview.innerHTML += `
+              <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200">
+                <img src="${url}" class="w-full h-full object-cover"/>
+                <span class="absolute bottom-1 left-1 bg-amber-500 text-white text-[9px] px-1 py-0.5 rounded font-bold">Actuelle</span>
+              </div>`;
+          });
+        }
+
+        if (filesSelectionnes.length > 0) {
+          preview.classList.remove("hidden");
+          filesSelectionnes.forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = "relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-move";
+            div.draggable = true;
+            div.dataset.index = i;
+            
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragover', handleDragOver);
+            div.addEventListener('drop', handleDrop);
+            
+            div.innerHTML = `
+              <img src="${item.previewUrl}" class="w-full h-full object-cover pointer-events-none"/>
+              ${i === 0 && !editMode ? '<span class="absolute bottom-1 left-1 bg-primary text-white text-[9px] px-1.5 py-0.5 rounded font-bold">Principale</span>' : ""}
+              <button type="button" onclick="deletePhoto(${i})" class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 hover:bg-red-600 text-white flex items-center justify-center transition-colors">
+                <span class="material-symbols-outlined text-[14px]">close</span>
+              </button>
+            `;
+            preview.appendChild(div);
+          });
+        } else if (!editMode) {
+          preview.classList.add("hidden");
+        }
+      }
+
+      // Drag & Drop Reordering logic
+      let dragSrcIndex = null;
+      function handleDragStart(e) {
+        dragSrcIndex = this.dataset.index;
+        e.dataTransfer.effectAllowed = 'move';
+      }
+      function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      }
+      function handleDrop(e) {
+        e.stopPropagation();
+        const targetIdx = this.dataset.index;
+        if (dragSrcIndex !== null && dragSrcIndex !== targetIdx) {
+          const temp = filesSelectionnes[dragSrcIndex];
+          filesSelectionnes.splice(dragSrcIndex, 1);
+          filesSelectionnes.splice(targetIdx, 0, temp);
+          renderPreviews();
+        }
+      }
+
+      // Supprimer une photo de la sélection avant envoi
+      window.deletePhoto = function(idx) {
+        filesSelectionnes.splice(idx, 1);
+        renderPreviews();
+      };
+
+      // Soumettre formulaire (Publication ou Edition)
+      window.publierLogement = async function() {
+        const btn = document.getElementById("btn-publier");
+        btn.disabled = true;
+        btn.innerHTML = `<span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Envoi...`;
+
+        try {
+          const isPublic = document.getElementById("contact-public").checked;
+          
+          if (editMode) {
+            // Mode Edition : PUT /api/logements/:id
+            const data = {
+              titre: document.getElementById("titre").value.trim(),
+              type: document.getElementById("type").value,
+              quartier: document.getElementById("quartier").value,
+              adresse: document.getElementById("adresse").value.trim(),
+              chambres: parseInt(document.getElementById("chambres").value) || 1,
+              bains: parseInt(document.getElementById("bains").value) || 0,
+              superficie: parseFloat(document.getElementById("superficie").value) || null,
+              prix: parseFloat(document.getElementById("prix").value),
+              devise: document.getElementById("devise").value,
+              video_url: document.getElementById("video-url").value.trim(),
+              description: document.getElementById("description").value.trim(),
+              whatsapp_contact: document.getElementById("contact-whatsapp").value.trim(),
+              telephone_contact: document.getElementById("contact-tel-alt").value.trim(),
+              email_contact: document.getElementById("contact-email").value.trim(),
+              contact_public: isPublic,
+            };
+
+            const equipements = Array.from(document.querySelectorAll(".equip-cb:checked")).map(cb => cb.value);
+            data.equipements = equipements;
+
+            Swal.fire({
+              title: 'Mise à jour...',
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            await Logements.modifier(editId, data);
+            
+            Swal.fire({
+              icon: 'success',
+              title: 'Modifié !',
+              text: 'Vos modifications ont bien été enregistrées.',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.href = `details.html?id=${editId}`;
+            });
+
+          } else {
+            // Mode Publication : POST /api/logements
+            const formData = new FormData();
+            formData.append("titre", document.getElementById("titre").value.trim());
+            formData.append("type", document.getElementById("type").value);
+            formData.append("quartier", document.getElementById("quartier").value);
+            formData.append("adresse", document.getElementById("adresse").value.trim());
+            formData.append("chambres", document.getElementById("chambres").value || "1");
+            formData.append("bains", document.getElementById("bains").value || "0");
+            formData.append("superficie", document.getElementById("superficie").value || "");
+            formData.append("prix", document.getElementById("prix").value);
+            formData.append("devise", document.getElementById("devise").value);
+            formData.append("video_url", document.getElementById("video-url").value.trim());
+            formData.append("description", document.getElementById("description").value.trim());
+            formData.append("whatsapp_contact", document.getElementById("contact-whatsapp").value.trim());
+            formData.append("telephone_contact", document.getElementById("contact-tel-alt").value.trim());
+            formData.append("email_contact", document.getElementById("contact-email").value.trim());
+            formData.append("contact_public", isPublic);
+
+            const equipements = Array.from(document.querySelectorAll(".equip-cb:checked")).map(cb => cb.value);
+            formData.append("equipements", JSON.stringify(equipements));
+
+            // Ajouter les images compressées
+            filesSelectionnes.forEach(item => {
+              formData.append("photos", item.compressed, item.file.name);
+            });
+
+            Swal.fire({
+              title: 'Publication en cours...',
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            const log = await Logements.publier(formData);
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Publié !',
+              text: 'Votre logement est maintenant visible.',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.href = `details.html?id=${log.id}`;
+            });
+          }
+
+        } catch (e) {
+          console.error(e);
+          btn.disabled = false;
+          btn.innerHTML = editMode 
+            ? `<span class="material-symbols-outlined text-[18px]">save</span> Enregistrer` 
+            : `<span class="material-symbols-outlined text-[18px]">publish</span> Publier`;
+            
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: e.message || 'Une erreur est survenue.'
+          });
+        }
+      };
+    </script>
+  </body>
+</html>

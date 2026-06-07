@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      name="viewport"
+    />
+    <title>Bukavu Housing — Bukavu</title>
+    
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- Leaflet.js for Interactive Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#ffb866",
+              "secondary-container": "#d5e2e9",
+              "surface-container": "#e5eeff",
+              "primary-fixed": "#d6e3ff",
+              "surface-container-high": "#dce9ff",
+              surface: "#f8f9ff",
+              "primary-fixed-dim": "#adc7f7",
+              "inverse-primary": "#adc7f7",
+              "primary-container": "#1a365d",
+              "error-container": "#ffdad6",
+              "outline-variant": "#c4c6cf",
+              outline: "#74777f",
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              "on-primary-fixed-variant": "#2d476f",
+              "secondary-fixed": "#d8e4eb",
+              "surface-tint": "#455f88",
+              "on-tertiary-fixed": "#2b1700",
+              "surface-container-highest": "#d4e4fc",
+              "on-secondary-container": "#58646a",
+              "on-tertiary": "#ffffff",
+              "surface-bright": "#f8f9ff",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed-variant": "#673d00",
+              "surface-dim": "#ccdbf4",
+              "on-surface-variant": "#43474e",
+              "on-tertiary-container": "#d4903b",
+              "inverse-surface": "#223144",
+              "tertiary-container": "#4f2e00",
+              "surface-variant": "#d4e4fc",
+              "on-error-container": "#93000a",
+              background: "#f8f9ff",
+              "on-surface": "#0d1c2e",
+              "tertiary-fixed": "#ffddba",
+              "on-secondary-fixed-variant": "#3c494e",
+              "on-error": "#ffffff",
+              "surface-container-low": "#eff4ff",
+              "on-primary": "#ffffff",
+              error: "#ba1a1a",
+              tertiary: "#321b00",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#86a0cd",
+              secondary: "#546066",
+              "on-primary-fixed": "#001b3c",
+              "secondary-fixed-dim": "#bcc8cf",
+              "on-secondary-fixed": "#111d22",
+              "inverse-on-surface": "#eaf1ff",
+              "on-background": "#0d1c2e",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "stack-md": "16px",
+              "stack-lg": "24px",
+              "section-gap": "40px",
+              "stack-sm": "8px",
+              "container-margin": "16px",
+              gutter: "12px",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+    </style>
+    <script>
+      // Initialisation immédiate du Dark Mode pour éviter le flash blanc
+      const isDarkMode = localStorage.getItem('theme') === 'dark';
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body
+    class="bg-background text-on-background dark:bg-slate-950 dark:text-slate-200 font-sans min-h-screen pb-24 transition-colors duration-300"
+  >
+    <header
+      class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800/80 w-full top-0 sticky z-40 shadow-sm flex justify-between items-center px-6 py-4 transition-colors duration-300"
+    >
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='accueil.html'">
+        <span class="material-symbols-outlined text-primary dark:text-amber-500 text-3xl">home_work</span>
+        <h1 class="text-xl font-poppins font-bold text-primary dark:text-white">
+          Bukavu Housing
+        </h1>
+        <span
+          class="text-xs text-primary dark:text-amber-500 font-bold bg-primary/10 dark:bg-amber-500/10 px-3 py-1 rounded-full ml-1"
+          >Bukavu</span
+        >
+      </div>
+      <div class="flex items-center gap-2">
+        <span
+          id="user-avatar"
+          class="w-10 h-10 rounded-full bg-primary text-white dark:bg-amber-500 dark:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer shadow-md overflow-hidden border-2 border-slate-100 dark:border-slate-800"
+          onclick="window.location.href = 'profil.html'"
+        >
+          ?
+        </span>
+      </div>
+    </header>
+
+    <main
+      class="max-w-md mx-auto md:max-w-4xl px-container-margin space-y-section-gap pt-stack-lg"
+    >
+      <section class="space-y-stack-md">
+        <!-- Barre de recherche moderne avec autocomplétion -->
+        <div class="relative group z-30">
+          <div
+            class="absolute inset-y-0 left-4 flex items-center pointer-events-none"
+          >
+            <span class="material-symbols-outlined text-outline dark:text-slate-400">search</span>
+          </div>
+          <input
+            id="search-input"
+            class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full py-4 pl-12 pr-12 focus:ring-2 focus:ring-primary dark:focus:ring-amber-500 focus:border-transparent shadow-sm transition-all text-base text-slate-800 dark:text-slate-200 outline-none"
+            placeholder="Rechercher par quartier ou type (ex: Ibanda, Maison)..."
+            type="text"
+            autocomplete="off"
+          />
+          <button
+            onclick="lancerRecherche()"
+            class="absolute inset-y-0 right-4 flex items-center text-primary dark:text-amber-500 hover:scale-105 active:scale-95 transition-transform"
+          >
+            <span class="material-symbols-outlined">tune</span>
+          </button>
+
+          <!-- Dropdown d'autocomplétion -->
+          <div id="autocomplete-list" class="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-h-64 overflow-y-auto hidden">
+            <!-- Rempli par JavaScript -->
+          </div>
+        </div>
+
+        <div
+          class="flex gap-gutter overflow-x-auto no-scrollbar py-2 -mx-container-margin px-container-margin"
+        >
+          <button
+            data-type="tous"
+            onclick="filtrerType(this, 'tous')"
+            class="filtre-btn flex items-center gap-2 bg-primary text-on-primary dark:bg-amber-500 dark:text-slate-900 px-5 py-2.5 rounded-full whitespace-nowrap active:scale-95 transition-all font-bold text-xs uppercase tracking-wider shadow-sm"
+          >
+            <span class="material-symbols-outlined text-[18px]">home_work</span>
+            <span>Tous</span>
+          </button>
+          <button
+            data-type="appartement"
+            onclick="filtrerType(this, 'appartement')"
+            class="filtre-btn flex items-center gap-2 bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-full whitespace-nowrap hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">apartment</span>
+            <span class="font-label-md text-label-md">Appartements</span>
+          </button>
+          <button
+            data-type="maison"
+            onclick="filtrerType(this, 'maison')"
+            class="filtre-btn flex items-center gap-2 bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-full whitespace-nowrap hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">house</span>
+            <span class="font-label-md text-label-md">Maisons</span>
+          </button>
+          <button
+            data-type="studio"
+            onclick="filtrerType(this, 'studio')"
+            class="filtre-btn flex items-center gap-2 bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-full whitespace-nowrap hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">window</span>
+            <span class="font-label-md text-label-md">Studios</span>
+          </button>
+          <button
+            data-type="chambre"
+            onclick="filtrerType(this, 'chambre')"
+            class="filtre-btn flex items-center gap-2 bg-secondary-container text-on-secondary-container px-5 py-2.5 rounded-full whitespace-nowrap hover:bg-surface-container-high transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">bed</span>
+            <span class="font-label-md text-label-md">Chambres</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="space-y-stack-md">
+        <div class="flex justify-between items-end">
+          <h2 class="text-headline-lg font-headline-lg text-primary">
+            Recommandés pour vous
+          </h2>
+          <button
+            onclick="window.location.href = 'resultats.html'"
+            class="text-primary font-label-md text-label-md uppercase tracking-wider"
+          >
+            Voir tout
+          </button>
+        </div>
+
+        <div
+          id="skeleton-recommandes"
+          class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg"
+        >
+          <div
+            class="animate-pulse bg-surface-container-high rounded-xl h-64"
+          ></div>
+          <div
+            class="animate-pulse bg-surface-container-high rounded-xl h-64"
+          ></div>
+        </div>
+
+        <div
+          id="cards-recommandes"
+          class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg hidden"
+        ></div>
+      </section>
+
+      <section class="space-y-stack-md">
+        <div class="flex justify-between items-end">
+          <h2 class="text-headline-lg font-headline-lg text-primary">
+            Quartiers populaires
+          </h2>
+          <div class="flex items-center gap-1 text-primary">
+            <span class="material-symbols-outlined text-[18px]"
+              >location_on</span
+            >
+            <span class="text-label-md font-label-md">Bukavu</span>
+          </div>
+        </div>
+        <div
+          id="cards-recent"
+          class="flex gap-stack-lg overflow-x-auto no-scrollbar -mx-container-margin px-container-margin pb-4"
+        >
+          <div
+            class="animate-pulse flex-none w-64 bg-surface-container-high rounded-xl h-40"
+          ></div>
+          <div
+            class="animate-pulse flex-none w-64 bg-surface-container-high rounded-xl h-40"
+          ></div>
+          <div
+            class="animate-pulse flex-none w-64 bg-surface-container-high rounded-xl h-40"
+          ></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bouton Carte flottant -->
+    <button
+      onclick="toggleMapModal()"
+      class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-3 rounded-full flex items-center gap-2 shadow-lg z-30 hover:scale-105 active:scale-95 transition-all text-xs uppercase tracking-widest"
+    >
+      <span class="material-symbols-outlined">map</span>
+      <span>Voir la carte</span>
+    </button>
+
+    <!-- Modal Carte Interactive (Leaflet.js) -->
+    <div id="map-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 w-full max-w-4xl h-[80vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col relative transition-colors duration-300">
+        <header class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary dark:text-amber-500">map</span>
+            <h3 class="font-poppins font-bold text-lg text-slate-900 dark:text-white">Carte Interactive Bukavu Housing</h3>
+          </div>
+          <button onclick="toggleMapModal()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 transition-transform">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </header>
+        <div id="map-container" class="flex-1 w-full h-full bg-slate-100 dark:bg-slate-950"></div>
+      </div>
+    </div>
+
+    <!-- Navigation fixe bottom -->
+    <nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-white dark:bg-card-dark shadow-[0_-4px_12px_rgba(0,0,0,0.06)] border-t border-slate-100 dark:border-slate-800 rounded-t-2xl transition-colors">
+      <a href="accueil.html" class="flex flex-col items-center text-primary dark:text-amber-500 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] font-bold">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[10px] font-semibold">Recherche</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[10px] font-semibold">Publier</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1 relative">
+        <span class="material-symbols-outlined">mail</span>
+        <span class="text-[10px] font-semibold">Messages</span>
+        <span id="unread-messages-badge" class="hidden absolute top-0.5 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-semibold">Profil</span>
+      </a>
+    </nav>
+
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+      const user = Auth.currentUser();
+      const avatar = document.getElementById("user-avatar");
+      if (user) {
+        if (user.avatar_url) {
+          avatar.innerHTML = `<img src="${user.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatar.textContent = (user.nom || user.email || "U")
+            .charAt(0)
+            .toUpperCase();
+        }
+      }
+
+      chargerLogements();
+      chargerRecents();
+      verifierMessagesNonLus();
+
+      async function verifierMessagesNonLus() {
+        try {
+          const messages = await Users.messages();
+          const userObj = Auth.currentUser();
+          const unread = messages.some(m => !m.lu && m.destinataire.id === userObj.id);
+          document.getElementById("unread-messages-badge").classList.toggle("hidden", !unread);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Liste des quartiers de Bukavu pour l'autocomplétion
+      const quartiersBukavu = [
+        'Ibanda', 'Nyalukemba', 'Panzi', 'Ndendere', 'Essence', 
+        'Kadutu', 'Nkafu', 'Cimpunda', 'Funu', 'Bagira', 'Kasha', 'Nyakavogo'
+      ];
+
+      // Dictionnaire de coordonnées géographiques pour la carte Leaflet
+      const NEIGHBORHOOD_COORDS = {
+        "ibanda": [-2.5028, 28.8647],
+        "nyalukemba": [-2.5090, 28.8750],
+        "panzi": [-2.5400, 28.8450],
+        "ndendere": [-2.5080, 28.8610],
+        "essence": [-2.5150, 28.8480],
+        "kadutu": [-2.5130, 28.8410],
+        "nkafu": [-2.5030, 28.8350],
+        "cimpunda": [-2.5180, 28.8370],
+        "funu": [-2.5110, 28.8450],
+        "bagira": [-2.4760, 28.8250],
+        "kasha": [-2.4900, 28.8050],
+        "nyakavogo": [-2.4820, 28.8210]
+      };
+
+      // Gestion de l'autocomplétion
+      const searchInput = document.getElementById("search-input");
+      const autocompleteList = document.getElementById("autocomplete-list");
+
+      searchInput.addEventListener("input", () => {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) {
+          autocompleteList.classList.add("hidden");
+          return;
+        }
+
+        const matches = quartiersBukavu.filter(q => q.toLowerCase().includes(query));
+        if (matches.length === 0) {
+          autocompleteList.classList.add("hidden");
+          return;
+        }
+
+        autocompleteList.innerHTML = matches.map(m => `
+          <div onclick="selectNeighborhood('${m}')" class="px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer text-sm font-semibold flex items-center gap-3 text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-all duration-200">
+            <span class="material-symbols-outlined text-amber-500 text-lg">location_on</span>
+            <span>${m}</span>
+          </div>
+        `).join('');
+
+        autocompleteList.classList.remove("hidden");
+      });
+
+      window.selectNeighborhood = function(name) {
+        searchInput.value = name;
+        autocompleteList.classList.add("hidden");
+        window.location.href = `resultats.html?q=${encodeURIComponent(name)}`;
+      };
+
+      // Cacher la liste si clic à l'extérieur
+      document.addEventListener("click", (e) => {
+        if (!searchInput.contains(e.target) && !autocompleteList.contains(e.target)) {
+          autocompleteList.classList.add("hidden");
+        }
+      });
+
+      // Gestion de la carte interactive Leaflet
+      let map = null;
+      let mapMarkers = [];
+
+      window.toggleMapModal = async function() {
+        const modal = document.getElementById("map-modal");
+        const isOpen = !modal.classList.contains("hidden");
+        
+        if (isOpen) {
+          modal.classList.add("hidden");
+        } else {
+          modal.classList.remove("hidden");
+          setTimeout(() => {
+            initMap();
+          }, 200);
+        }
+      };
+
+      async function initMap() {
+        // Coordonnées par défaut : Bukavu Centre
+        const bukavuCenter = [-2.5028, 28.8647];
+        
+        if (!map) {
+          map = L.map('map-container').setView(bukavuCenter, 13);
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+          }).addTo(map);
+        } else {
+          map.invalidateSize();
+        }
+
+        // Nettoyer les anciens marqueurs
+        mapMarkers.forEach(m => map.removeLayer(m));
+        mapMarkers = [];
+
+        try {
+          const { logements } = await Logements.lister({ limit: 100 });
+          if (logements && logements.length > 0) {
+            logements.forEach(log => {
+              const q = (log.quartier || "ibanda").toLowerCase().trim();
+              const center = NEIGHBORHOOD_COORDS[q] || bukavuCenter;
+              
+              // Petit décalage aléatoire pour que les marqueurs du même quartier ne se chevauchent pas
+              const lat = center[0] + (Math.random() - 0.5) * 0.005;
+              const lng = center[1] + (Math.random() - 0.5) * 0.005;
+
+              const img = log.images && log.images[0]
+                ? log.images[0]
+                : "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+              const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF") + "/mois";
+
+              const marker = L.marker([lat, lng]).addTo(map);
+              
+              const popupContent = `
+                <div class="w-48 font-sans p-1">
+                  <img src="${img}" class="w-full h-24 object-cover rounded-xl mb-2" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+                  <h4 class="font-bold text-sm text-slate-900 truncate mb-0.5">${log.titre}</h4>
+                  <p class="text-amber-600 font-bold text-xs mb-1">${prix}</p>
+                  <p class="text-slate-500 text-[10px] mb-2 flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">location_on</span>${log.quartier}</p>
+                  <a href="details.html?id=${log.id}" class="block text-center bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 text-xs font-bold py-1.5 rounded-lg hover:opacity-90 transition-opacity">Voir les détails</a>
+                </div>
+              `;
+              
+              marker.bindPopup(popupContent);
+              mapMarkers.push(marker);
+            });
+          }
+        } catch (err) {
+          console.error("Erreur d'initialisation de la carte:", err);
+        }
+      }
+
+      function creerCarte(log, id) {
+        const prix =
+          log.prix.toLocaleString("fr-CD") +
+          " " +
+          (log.devise || "CDF") +
+          "/mois";
+        const img =
+          log.images && log.images[0]
+            ? log.images[0]
+            : "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+        return `
+      <div onclick="window.location.href='details.html?id=${id}'"
+        class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-800/80 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between h-full hover:-translate-y-1">
+        <div class="relative aspect-[4/3] w-full overflow-hidden">
+          <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${img}" alt="${log.titre}" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+          <div class="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 backdrop-blur px-3 py-1.5 rounded-xl font-bold text-xs text-primary dark:text-amber-500 shadow-md">${prix}</div>
+          <button onclick="toggleFavori(event,'${id}')" class="favoris-btn absolute top-4 right-4 bg-white/90 backdrop-blur-md p-2.5 rounded-full shadow-sm text-slate-500 dark:text-slate-400 active:scale-90 transition-transform hover:text-red-500" data-id="${id}">
+            <span class="material-symbols-outlined fav-icon text-[20px]" style="font-variation-settings:'FILL' 0">favorite</span>
+          </button>
+        </div>
+        <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+          <div class="space-y-1.5">
+            <div class="flex gap-2">
+              <span class="bg-primary/5 text-primary dark:bg-slate-800 dark:text-amber-500 font-bold text-[9px] px-2.5 py-1 rounded-md uppercase tracking-wider">${log.type || "Logement"}</span>
+              <span class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 font-bold text-[9px] px-2.5 py-1 rounded-md uppercase tracking-wider">${log.quartier || "Bukavu"}</span>
+            </div>
+            <h3 class="font-poppins font-bold text-base text-slate-900 dark:text-white truncate leading-snug">${log.titre}</h3>
+            <div class="flex items-center text-slate-500 dark:text-slate-400 gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">location_on</span>
+              <span class="text-xs font-semibold">${log.quartier}, Bukavu</span>
+            </div>
+          </div>
+          <div class="flex gap-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-primary dark:text-amber-500">bed</span>
+              <span class="text-xs font-bold">${log.chambres || 1} Ch.</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-primary dark:text-amber-500">bathtub</span>
+              <span class="text-xs font-bold">${log.bains || 1} Bain</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-primary dark:text-amber-500">square_foot</span>
+              <span class="text-xs font-bold">${log.superficie || "?"} m²</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+      }
+
+      function creerPetiteCarte(log, id) {
+        const img =
+          log.images && log.images[0]
+            ? log.images[0]
+            : "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+        const prix =
+          log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF");
+        return `
+      <div onclick="window.location.href='details.html?id=${id}'"
+        class="flex-none w-64 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800/80 active:scale-[0.98] transition-transform cursor-pointer">
+        <img class="w-full h-32 object-cover" src="${img}" alt="${log.titre}" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+        <div class="p-4 space-y-1">
+          <p class="font-bold text-sm text-primary dark:text-white truncate">${log.titre}</p>
+          <p class="text-xs text-amber-500 font-bold">${prix}/mois • ${log.superficie || "?"} m²</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
+            <span class="material-symbols-outlined text-[14px]">location_on</span>${log.quartier}
+          </p>
+        </div>
+      </div>`;
+      }
+
+      async function chargerLogements(typeFiltre = "tous") {
+        const skel = document.getElementById("skeleton-recommandes");
+        const container = document.getElementById("cards-recommandes");
+        skel.classList.remove("hidden");
+        container.classList.add("hidden");
+        container.innerHTML = "";
+
+        try {
+          const params = { limit: 6 };
+          if (typeFiltre !== "tous") params.type = typeFiltre;
+          const { logements } = await Logements.lister(params);
+
+          if (!logements || logements.length === 0) {
+            container.innerHTML = `
+          <div class="col-span-2 text-center py-12 text-slate-500 dark:text-slate-400">
+            <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-700">search_off</span>
+            <p class="mt-2 text-sm font-semibold">Aucun logement disponible pour l'instant.</p>
+            <p class="text-xs mt-1">Soyez le premier à <a href="publier.html" class="text-primary dark:text-amber-500 underline font-bold">publier un logement</a> !</p>
+          </div>`;
+          } else {
+            logements.forEach((log) => {
+              container.innerHTML += creerCarte(log, log.id);
+            });
+            // Mettre à jour le statut des favoris des cartes affichées
+            logements.forEach(async (log) => {
+              try {
+                const { favori } = await Users.isFavori(log.id);
+                const btn = document.querySelector(`.favoris-btn[data-id="${log.id}"]`);
+                if (btn) {
+                  const icon = btn.querySelector(".fav-icon");
+                  icon.style.fontVariationSettings = favori ? "'FILL' 1" : "'FILL' 0";
+                  icon.style.color = favori ? "#ba1a1a" : "";
+                }
+              } catch {}
+            });
+          }
+        } catch (e) {
+          console.error(e);
+          container.innerHTML = `<div class="col-span-2 text-center py-8 text-red-500 text-sm">Erreur de chargement. Vérifiez votre connexion.</div>`;
+        }
+
+        skel.classList.add("hidden");
+        container.classList.remove("hidden");
+      }
+
+      async function chargerRecents() {
+        const container = document.getElementById("cards-recent");
+        try {
+          const { logements } = await Logements.lister({ limit: 5 });
+          if (logements && logements.length > 0) {
+            container.innerHTML = "";
+            logements.forEach((log) => {
+              container.innerHTML += creerPetiteCarte(log, log.id);
+            });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      window.filtrerType = function (btn, type) {
+        document.querySelectorAll(".filtre-btn").forEach((b) => {
+          b.className = "filtre-btn flex items-center gap-2 bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300 px-5 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition-colors font-bold text-xs uppercase tracking-wider shadow-sm";
+        });
+        btn.className = "filtre-btn flex items-center gap-2 bg-primary text-white dark:bg-amber-500 dark:text-slate-900 px-5 py-2.5 rounded-full whitespace-nowrap active:scale-95 transition-all font-bold text-xs uppercase tracking-wider shadow-md";
+        chargerLogements(type);
+      };
+
+      window.lancerRecherche = function () {
+        const val = document.getElementById("search-input").value.trim();
+        if (val) {
+          window.location.href = `resultats.html?q=${encodeURIComponent(val)}`;
+        } else {
+          window.location.href = "resultats.html";
+        }
+      };
+
+      document
+        .getElementById("search-input")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") window.lancerRecherche();
+        });
+
+      window.toggleFavori = async function (e, id) {
+        e.stopPropagation();
+        const btn = document.querySelector(`.favoris-btn[data-id="${id}"]`);
+        const icon = btn.querySelector(".fav-icon");
+        try {
+          const { favori } = await Users.toggleFavori(id);
+          icon.style.fontVariationSettings = favori ? "'FILL' 1" : "'FILL' 0";
+          icon.style.color = favori ? "#ba1a1a" : "";
+          
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: 'success',
+            title: favori ? 'Ajouté aux favoris !' : 'Retiré des favoris.'
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      };
+    </script>
+  </body>
+</html>

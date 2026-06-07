@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="fr" class="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Bukavu Housing — Détails du Logement</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800 dark:bg-surface-dark dark:text-slate-200 font-sans pb-24 transition-colors duration-300">
+    
+    <!-- Loader de chargement -->
+    <div id="loading" class="fixed inset-0 bg-slate-50 dark:bg-surface-dark flex flex-col items-center justify-center z-50 gap-4 transition-colors">
+      <div class="w-12 h-12 border-4 border-primary dark:border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-slate-500 dark:text-slate-400">Chargement des détails...</p>
+    </div>
+
+    <!-- Actions rapides en haut -->
+    <div class="fixed top-0 left-0 right-0 z-40 flex justify-between items-center px-4 py-3 pointer-events-none">
+      <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center bg-white/95 dark:bg-slate-850/95 backdrop-blur-md rounded-full shadow-md pointer-events-auto active:scale-95 transition-transform text-slate-800 dark:text-white">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <div class="flex gap-2">
+        <button onclick="partager()" class="w-10 h-10 flex items-center justify-center bg-white/95 dark:bg-slate-850/95 backdrop-blur-md rounded-full shadow-md pointer-events-auto active:scale-95 transition-transform text-slate-800 dark:text-white">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+        <button id="btn-favori" onclick="toggleFavori()" class="w-10 h-10 flex items-center justify-center bg-white/95 dark:bg-slate-850/95 backdrop-blur-md rounded-full shadow-md pointer-events-auto active:scale-95 transition-transform">
+          <span class="material-symbols-outlined text-slate-400" id="fav-icon">favorite</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Galerie d'images en carrousel -->
+    <div class="relative w-full h-[360px] overflow-hidden bg-slate-200 dark:bg-slate-800">
+      <div class="flex h-full w-full overflow-x-auto snap-x snap-mandatory no-scrollbar" id="gallery">
+        <!-- Rempli par JS -->
+      </div>
+      <div id="gallery-indicator" class="absolute bottom-6 right-4 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-bold shadow-md">
+        1/1
+      </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-4 -mt-8 relative z-10">
+      <div class="bg-white dark:bg-card-dark rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6 transition-colors">
+        
+        <!-- En-tête de l'annonce -->
+        <div id="header-logement" class="space-y-2">
+          <!-- Chargé en JS -->
+        </div>
+
+        <!-- Compteur de vues discret -->
+        <div class="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 font-medium">
+          <span class="material-symbols-outlined text-sm">visibility</span>
+          <span id="vues-count">0 personnes ont consulté cette annonce</span>
+        </div>
+
+        <!-- Caractéristiques rapides -->
+        <div id="specs-logement" class="grid grid-cols-3 gap-3">
+          <!-- Chargé en JS -->
+        </div>
+
+        <!-- Description -->
+        <section class="space-y-2">
+          <h2 class="font-poppins font-bold text-lg text-primary dark:text-white">Description</h2>
+          <div class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            <p class="line-clamp-4" id="desc-text"></p>
+            <button class="text-primary dark:text-amber-500 font-bold mt-2 flex items-center text-sm" onclick="toggleDesc()">
+              <span id="desc-btn-text">Lire plus</span>
+              <span class="material-symbols-outlined text-[16px] ml-1" id="desc-icon">expand_more</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Équipements -->
+        <section id="equipements-section" class="space-y-3 hidden">
+          <h2 class="font-poppins font-bold text-lg text-primary dark:text-white">Équipements</h2>
+          <div id="equipements-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+        </section>
+
+        <!-- Visite virtuelle YouTube -->
+        <section id="video-section" class="space-y-3 hidden">
+          <h2 class="font-poppins font-bold text-lg text-primary dark:text-white">Visite Virtuelle</h2>
+          <div id="video-container"></div>
+        </section>
+
+        <!-- Coordonnées Propriétaire -->
+        <section class="bg-slate-50 dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
+          <div class="flex items-center gap-3">
+            <div id="proprietaire-avatar" class="w-14 h-14 rounded-full bg-primary text-white dark:bg-amber-500 flex items-center justify-center text-2xl font-bold border-2 border-white dark:border-slate-800 shadow-sm overflow-hidden">
+              ?
+            </div>
+            <div>
+              <div class="flex items-center gap-1">
+                <h3 class="font-poppins font-bold text-sm text-slate-900 dark:text-white" id="proprietaire-nom">Chargement...</h3>
+                <span id="proprio-badge-verifie" class="hidden text-green-500 material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">verified</span>
+              </div>
+              <p class="text-slate-400 dark:text-slate-500 text-xs">Propriétaire</p>
+            </div>
+          </div>
+          
+          <div class="flex flex-wrap gap-2">
+            <!-- Boutons de contacts (WhatsApp, Appel, Email) -->
+            <div id="contact-buttons" class="flex gap-2"></div>
+            <!-- Toujours disponible: Messagerie interne -->
+            <button onclick="ouvrirDiscussion()" class="px-4 py-2.5 bg-primary dark:bg-amber-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm hover:scale-[1.02] active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-sm">send</span> Envoyer un message
+            </button>
+          </div>
+        </section>
+
+        <!-- Section de signalement discrète -->
+        <div class="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="signalerAnnonce()" class="text-xs text-red-500 hover:text-red-700 dark:text-red-400/80 font-bold flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-sm">report</span> Signaler cette annonce
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Logements similaires -->
+      <section class="mt-8 space-y-4">
+        <h2 class="font-poppins font-bold text-xl text-primary dark:text-white">Logements similaires</h2>
+        
+        <div id="liste-similaires" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Similaires grid loaded via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Fixe bottom prix + CTA -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white dark:bg-card-dark border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between gap-4 z-40 transition-colors shadow-lg">
+      <div>
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Loyer mensuel</p>
+        <p class="font-poppins font-bold text-2xl text-primary dark:text-white" id="prix-footer">—</p>
+      </div>
+      <button onclick="ouvrirDiscussion()" class="bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 py-3.5 px-8 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all">
+        Contacter <span class="material-symbols-outlined text-[18px]">send</span>
+      </button>
+    </footer>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      // Dark Mode
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const logementId = params.get("id");
+      let logementData = null;
+      let estEnFavori = false;
+
+      if (!logementId) window.location.href = "resultats.html";
+
+      // 1. Incrémenter les vues sur chargement
+      async function incrementerVues() {
+        try {
+          await Logements.incrementerVue(logementId);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      incrementerVues();
+
+      // 2. Charger les détails du logement
+      async function chargerLogement() {
+        try {
+          logementData = await Logements.detail(logementId);
+          afficherLogement(logementData);
+          verifierFavori();
+          chargerSimilaires();
+        } catch (e) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Logement introuvable.'
+          }).then(() => {
+            window.location.href = "resultats.html";
+          });
+        }
+        document.getElementById("loading").classList.add("hidden");
+      }
+
+      async function verifierFavori() {
+        try {
+          const { favori } = await Users.isFavori(logementId);
+          estEnFavori = favori;
+          const icon = document.getElementById("fav-icon");
+          icon.style.fontVariationSettings = estEnFavori ? "'FILL' 1" : "'FILL' 0";
+          icon.style.color = estEnFavori ? "#ef4444" : "";
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // 3. Afficher les informations de l'annonce
+      function afficherLogement(log) {
+        document.title = `Bukavu Housing — ${log.titre}`;
+        const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF") + "/mois";
+        document.getElementById("prix-footer").textContent = prix;
+
+        // Vues
+        document.getElementById("vues-count").textContent = `${log.vues || 1} personne${log.vues > 1 ? 's ont' : ' a'} consulté cette annonce`;
+
+        // Galerie
+        const gallery = document.getElementById("gallery");
+        const images = log.images && log.images.length > 0 ? log.images : [
+          "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600"
+        ];
+        gallery.innerHTML = images.map(url => `
+          <div class="min-w-full h-full snap-center">
+            <img class="w-full h-full object-cover" src="${url}" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600'"/>
+          </div>
+        `).join("");
+        
+        document.getElementById("gallery-indicator").textContent = `1/${images.length}`;
+        gallery.addEventListener("scroll", () => {
+          const idx = Math.round(gallery.scrollLeft / gallery.clientWidth) + 1;
+          document.getElementById("gallery-indicator").textContent = `${idx}/${images.length}`;
+        });
+
+        // En-tête
+        document.getElementById("header-logement").innerHTML = `
+          <div class="flex gap-2 mb-2">
+            <span class="bg-primary/10 text-primary dark:bg-amber-500/10 dark:text-amber-500 px-3 py-1 rounded-full text-xs font-bold uppercase">${log.type || "Logement"}</span>
+            <span class="bg-slate-100 text-slate-600 dark:bg-slate-850 dark:text-slate-300 px-3 py-1 rounded-full text-xs font-bold uppercase">${log.quartier}</span>
+          </div>
+          <h1 class="font-poppins font-bold text-2xl text-slate-900 dark:text-white leading-tight">${log.titre}</h1>
+          <p class="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">location_on</span>
+            ${log.adresse ? log.adresse + ", " : ""}${log.quartier}, Bukavu
+          </p>`;
+
+        // Specs
+        document.getElementById("specs-logement").innerHTML = `
+          <div class="bg-slate-100 dark:bg-slate-900/60 p-3 rounded-2xl flex flex-col items-center text-center">
+            <span class="material-symbols-outlined text-primary dark:text-amber-500 mb-1">bed</span>
+            <span class="font-bold text-base text-primary dark:text-white">${log.chambres || "—"}</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">Chambres</span>
+          </div>
+          <div class="bg-slate-100 dark:bg-slate-900/60 p-3 rounded-2xl flex flex-col items-center text-center">
+            <span class="material-symbols-outlined text-primary dark:text-amber-500 mb-1">bathtub</span>
+            <span class="font-bold text-base text-primary dark:text-white">${log.bains || "—"}</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">Bains</span>
+          </div>
+          <div class="bg-slate-100 dark:bg-slate-900/60 p-3 rounded-2xl flex flex-col items-center text-center">
+            <span class="material-symbols-outlined text-primary dark:text-amber-500 mb-1">square_foot</span>
+            <span class="font-bold text-base text-primary dark:text-white">${log.superficie || "—"}</span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase">Superficie m²</span>
+          </div>`;
+
+        // Description
+        document.getElementById("desc-text").textContent = log.description || "Aucune description fournie.";
+
+        // Équipements
+        const equip = log.equipements || [];
+        const icones = {
+          eau: "water_drop", electricite: "bolt", wifi: "wifi", parking: "local_parking",
+          gardien: "security", cuisine: "countertops", meuble: "chair", terrasse: "deck"
+        };
+        const noms = {
+          eau: "Eau courante", electricite: "Électricité", wifi: "WiFi", parking: "Parking",
+          gardien: "Gardien", cuisine: "Cuisine équipée", meuble: "Meublé", terrasse: "Terrasse"
+        };
+        if (equip.length > 0) {
+          document.getElementById("equipements-section").classList.remove("hidden");
+          document.getElementById("equipements-grid").innerHTML = equip.map(e => `
+            <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/40 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span class="material-symbols-outlined text-primary dark:text-amber-500 text-[18px]">${icones[e] || "check_circle"}</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">${noms[e] || e}</span>
+            </div>
+          `).join("");
+        }
+
+        // Lecteur YouTube si video_url fournie
+        if (log.video_url) {
+          const videoId = getYouTubeId(log.video_url);
+          if (videoId) {
+            document.getElementById("video-section").classList.remove("hidden");
+            document.getElementById("video-container").innerHTML = `
+              <div class="relative pb-[56.25%] h-0 rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 mt-2">
+                <iframe class="absolute top-0 left-0 w-full h-full border-0" 
+                  src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+              </div>`;
+          }
+        }
+
+        // Profil propriétaire
+        const proprio = log.utilisateurs || {};
+        const initiale = (proprio.nom || "P").charAt(0).toUpperCase();
+        const avatarEl = document.getElementById("proprietaire-avatar");
+        if (proprio.avatar_url) {
+          avatarEl.innerHTML = `<img src="${proprio.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatarEl.textContent = initiale;
+        }
+        document.getElementById("proprietaire-nom").textContent = proprio.nom || "Propriétaire";
+        
+        if (proprio.verifie) {
+          document.getElementById("proprio-badge-verifie").classList.remove("hidden");
+        }
+
+        // Afficher contacts si contact_public est vrai
+        const contactsContainer = document.getElementById("contact-buttons");
+        contactsContainer.innerHTML = "";
+        
+        if (log.contact_public !== false) {
+          const waNum = log.whatsapp_contact || proprio.whatsapp || "";
+          const phoneNum = log.telephone_contact || proprio.telephone || "";
+          const emailAddr = log.email_contact || proprio.email_contact || proprio.email || "";
+
+          // Bouton WhatsApp vert
+          if (waNum) {
+            const waClean = waNum.replace(/[+\s]/g, '');
+            const waText = encodeURIComponent(`Bonjour, je suis intéressé par votre annonce Bukavu Housing : "${log.titre}" (${prix}). Est-elle toujours disponible ?`);
+            contactsContainer.innerHTML += `
+              <a href="https://wa.me/${waClean}?text=${waText}" target="_blank" 
+                class="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-colors shadow-sm" title="WhatsApp">
+                <span class="material-symbols-outlined text-[20px] font-bold">chat</span>
+              </a>`;
+          }
+
+          // Bouton Appel
+          if (phoneNum) {
+            contactsContainer.innerHTML += `
+              <a href="tel:${phoneNum}" 
+                class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-primary dark:text-white flex items-center justify-center transition-colors shadow-sm" title="Appeler">
+                <span class="material-symbols-outlined text-[20px]">call</span>
+              </a>`;
+          }
+
+          // Bouton Email
+          if (emailAddr) {
+            contactsContainer.innerHTML += `
+              <a href="mailto:${emailAddr}?subject=Bukavu Housing: ${encodeURIComponent(log.titre)}" 
+                class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 text-primary dark:text-white flex items-center justify-center transition-colors shadow-sm" title="Envoyer un email">
+                <span class="material-symbols-outlined text-[20px]">mail</span>
+              </a>`;
+          }
+        }
+      }
+
+      function getYouTubeId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+      }
+
+      // 4. Charger logements similaires
+      async function chargerSimilaires() {
+        const container = document.getElementById("liste-similaires");
+        try {
+          const similaires = await Logements.similaires(logementId);
+          if (!similaires || similaires.length === 0) {
+            container.innerHTML = `<p class="text-xs text-slate-400 dark:text-slate-500">Aucun logement similaire trouvé.</p>`;
+            return;
+          }
+          container.innerHTML = "";
+          similaires.forEach(log => {
+            const img = log.images?.[0] || "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+            const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF") + "/mois";
+            container.innerHTML += `
+              <div onclick="window.location.href='details.html?id=${log.id}'"
+                class="bg-white dark:bg-card-dark border border-slate-100 dark:border-slate-850 rounded-2xl overflow-hidden shadow-sm flex hover:shadow-md cursor-pointer transition-all">
+                <img src="${img}" class="w-28 h-24 object-cover flex-none bg-slate-100" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+                <div class="p-3 min-w-0 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 class="font-poppins font-bold text-xs text-slate-900 dark:text-white truncate">${log.titre}</h4>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500">${log.quartier} • ${prix}</p>
+                  </div>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">bed</span> ${log.chambres} Ch. • ${log.superficie || '?'} m²
+                  </p>
+                </div>
+              </div>`;
+          });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // 5. Partage
+      window.partager = function() {
+        if (navigator.share && logementData) {
+          navigator.share({
+            title: logementData.titre,
+            url: window.location.origin + '/details.html?id=' + logementId,
+          }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(window.location.origin + '/details.html?id=' + logementId);
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: 'success',
+            title: 'Lien copié dans le presse-papier !'
+          });
+        }
+      };
+
+      // 6. Basculer favori
+      window.toggleFavori = async function() {
+        try {
+          const { favori } = await Users.toggleFavori(logementId);
+          estEnFavori = favori;
+          const icon = document.getElementById("fav-icon");
+          icon.style.fontVariationSettings = estEnFavori ? "'FILL' 1" : "'FILL' 0";
+          icon.style.color = estEnFavori ? "#ef4444" : "";
+          
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: 'success',
+            title: estEnFavori ? 'Ajouté aux favoris !' : 'Retiré des favoris !'
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      };
+
+      // 7. Signaler l'annonce
+      window.signalerAnnonce = async function() {
+        const { value: raison } = await Swal.fire({
+          title: 'Signaler cette annonce',
+          input: 'select',
+          inputOptions: {
+            'Faux logement': 'Faux logement / Arnaque',
+            'Prix incorrect': 'Prix incorrect',
+            'Contenu inapproprié': 'Contenu inapproprié',
+            'Autre': 'Autre raison'
+          },
+          inputPlaceholder: '-- Choisir la raison --',
+          showCancelButton: true,
+          confirmButtonColor: '#1a3a5c',
+          cancelButtonText: 'Annuler',
+          confirmButtonText: 'Signaler',
+          inputValidator: (value) => {
+            return new Promise((resolve) => {
+              if (value) resolve();
+              else resolve('Vous devez choisir une raison.');
+            });
+          }
+        });
+
+        if (raison) {
+          Swal.fire({
+            title: 'Traitement...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+          try {
+            await Logements.signaler(logementId, raison);
+            Swal.fire({
+              icon: 'success',
+              title: 'Merci !',
+              text: 'Votre signalement a été transmis avec succès pour examen.',
+              confirmButtonColor: '#1a3a5c'
+            });
+          } catch (err) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erreur',
+              text: err.message || 'Impossible de signaler cette annonce.'
+            });
+          }
+        }
+      };
+
+      // 8. Ouvrir la discussion avec le propriétaire
+      window.ouvrirDiscussion = function() {
+        if (!logementData) return;
+        const recipientId = logementData.proprietaire_id;
+        if (recipientId === Auth.currentUser().id) {
+          return Swal.fire({
+            icon: 'info',
+            title: 'Propriétaire',
+            text: 'C\'est votre propre annonce ! Vous ne pouvez pas vous envoyer de message à vous-même.',
+            confirmButtonColor: '#1a3a5c'
+          });
+        }
+        window.location.href = `mes-messages.html?dest=${recipientId}&logement=${logementId}`;
+      };
+
+      window.toggleDesc = function() {
+        const el = document.getElementById("desc-text");
+        const icon = document.getElementById("desc-icon");
+        const btnText = document.getElementById("desc-btn-text");
+        const clamped = el.classList.contains("line-clamp-4");
+        
+        el.classList.toggle("line-clamp-4", !clamped);
+        btnText.textContent = clamped ? "Lire moins" : "Lire plus";
+        icon.textContent = clamped ? "expand_less" : "expand_more";
+      };
+
+      chargerLogement();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Messagerie — Bukavu Housing</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              background: "#f8f9ff",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+      /* Chat bubble custom scrollbar */
+      .chat-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .chat-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .chat-scroll::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+        border-radius: 9999px;
+      }
+      .chat-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.5);
+      }
+    </style>
+    <script>
+      // Initialisation immédiate du Dark Mode pour éviter le flash blanc
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-background text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans min-h-screen pb-20 md:pb-0 flex flex-col transition-colors duration-300">
+    
+    <!-- Top Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800/80 w-full sticky top-0 z-40 shadow-sm flex justify-between items-center px-6 py-4 transition-colors duration-300">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='accueil.html'">
+        <span class="material-symbols-outlined text-primary dark:text-amber-500 text-3xl">home_work</span>
+        <h1 class="text-xl font-poppins font-bold text-primary dark:text-white">Bukavu Housing</h1>
+        <span class="text-xs text-primary dark:text-amber-500 font-bold bg-primary/10 dark:bg-amber-500/10 px-3 py-1 rounded-full ml-1">Bukavu</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Notification / Help Button -->
+        <a href="aide.html" class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+          <span class="material-symbols-outlined text-xl">help</span>
+        </a>
+        <span id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white dark:bg-amber-500 dark:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer shadow-md overflow-hidden border-2 border-slate-100 dark:border-slate-800" onclick="window.location.href = 'profil.html'">
+          ?
+        </span>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 w-full max-w-6xl mx-auto flex overflow-hidden h-[calc(100vh-73px-64px)] md:h-[calc(100vh-73px)]">
+      
+      <!-- List column (conversations) -->
+      <section id="conversations-column" class="w-full md:w-80 lg:w-96 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex flex-col transition-all duration-300">
+        
+        <!-- Sidebar Header -->
+        <div class="p-4 border-b border-slate-100 dark:border-slate-800 space-y-3 bg-white dark:bg-slate-900">
+          <div class="flex justify-between items-center">
+            <h2 class="text-lg font-poppins font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary dark:text-amber-500">forum</span>
+              Discussions
+            </h2>
+            <span id="global-unread-badge" class="hidden px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full">0</span>
+          </div>
+          
+          <!-- Search in conversations -->
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3 flex items-center text-slate-400">
+              <span class="material-symbols-outlined text-sm">search</span>
+            </span>
+            <input id="search-threads" type="text" placeholder="Rechercher un contact ou logement..." class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary dark:focus:ring-amber-500 outline-none transition-all" />
+          </div>
+        </div>
+
+        <!-- Conversations list scrollable -->
+        <div id="threads-container" class="flex-1 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/40 chat-scroll">
+          <!-- Skeleton loaders -->
+          <div class="p-4 space-y-4" id="threads-skeleton">
+            <div class="flex items-center gap-3 animate-pulse">
+              <div class="w-12 h-12 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-5/6"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 animate-pulse">
+              <div class="w-12 h-12 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
+                <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Threads list placeholder / empty state -->
+          <div id="threads-empty" class="hidden flex flex-col items-center justify-center p-8 text-center h-full text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined text-5xl mb-3 text-slate-300 dark:text-slate-700">chat_bubble_outline</span>
+            <p class="text-sm font-semibold">Aucune discussion</p>
+            <p class="text-xs mt-1">Vos messages avec les propriétaires apparaîtront ici.</p>
+            <a href="resultats.html" class="mt-4 px-4 py-2 bg-primary dark:bg-amber-500 text-white dark:text-slate-950 font-bold rounded-xl text-xs shadow-sm hover:scale-[1.02] active:scale-95 transition-all">Rechercher des annonces</a>
+          </div>
+
+          <div id="threads-list" class="hidden divide-y divide-slate-50 dark:divide-slate-800/40"></div>
+        </div>
+
+      </section>
+
+      <!-- Chat column (messages) -->
+      <section id="chat-column" class="hidden md:flex flex-1 flex-col bg-slate-50 dark:bg-slate-950 transition-all duration-300 relative h-full">
+        
+        <!-- Active chat header -->
+        <header id="chat-header" class="hidden p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center z-10 shadow-sm">
+          <div class="flex items-center gap-3 min-w-0">
+            <!-- Mobile back arrow -->
+            <button onclick="backToThreads()" class="md:hidden w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 active:scale-90 transition-transform">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div id="chat-partner-avatar" class="w-10 h-10 rounded-full bg-primary text-white dark:bg-amber-500 flex items-center justify-center text-sm font-bold overflow-hidden border border-slate-100 dark:border-slate-800 flex-shrink-0 shadow-sm">
+              ?
+            </div>
+            <div class="min-w-0">
+              <h3 id="chat-partner-name" class="font-poppins font-bold text-sm text-slate-900 dark:text-white truncate">Nom Propriétaire</h3>
+              <p id="chat-listing-title" class="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate">Annonce associée</p>
+            </div>
+          </div>
+
+          <!-- Shortcuts -->
+          <div class="flex items-center gap-2">
+            <!-- Voir logement -->
+            <button id="btn-view-listing" class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-primary dark:text-amber-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm" title="Voir l'annonce">
+              <span class="material-symbols-outlined text-lg">info</span>
+            </button>
+            <!-- Call shortcut -->
+            <a id="btn-call-partner" href="" class="hidden w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-sm" title="Appeler">
+              <span class="material-symbols-outlined text-lg">call</span>
+            </a>
+            <!-- WhatsApp shortcut -->
+            <a id="btn-wa-partner" href="" target="_blank" class="hidden w-9 h-9 rounded-xl bg-green-500/10 hover:bg-green-500/20 text-green-500 flex items-center justify-center transition-colors shadow-sm" title="Discuter sur WhatsApp">
+              <span class="material-symbols-outlined text-lg font-bold">chat</span>
+            </a>
+          </div>
+        </header>
+
+        <!-- Message logs container -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 chat-scroll flex flex-col justify-end bg-gradient-to-b from-slate-50 to-slate-100/50 dark:from-slate-950 dark:to-slate-900/30">
+          
+          <!-- Default empty / select discussion state -->
+          <div id="no-chat-selected" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400 dark:text-slate-500 h-full">
+            <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-4xl text-primary/40 dark:text-amber-500/40">forum</span>
+            </div>
+            <h3 class="font-poppins font-bold text-base text-slate-700 dark:text-slate-300">Vos discussions</h3>
+            <p class="text-xs max-w-xs mt-1">Sélectionnez une discussion à gauche pour commencer à échanger avec le propriétaire du logement.</p>
+          </div>
+
+          <!-- Real chat message box -->
+          <div id="chat-active-messages-container" class="hidden flex-1 overflow-y-auto p-2 space-y-4 flex flex-col">
+            <!-- Messages load here -->
+          </div>
+
+        </div>
+
+        <!-- Chat Input Form -->
+        <footer id="chat-input-bar" class="hidden p-3 border-t border-slate-100 dark:border-slate-850 bg-white dark:bg-slate-900">
+          <form id="message-form" class="flex items-center gap-2" onsubmit="envoyerMessageForm(event)">
+            <input id="input-message" type="text" placeholder="Écrire un message..." class="flex-1 border-none bg-slate-50 dark:bg-slate-800 rounded-full px-4 py-3 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-primary dark:focus:ring-amber-500 focus:bg-white dark:focus:bg-slate-850 outline-none transition-all" autocomplete="off" />
+            <button type="submit" class="w-10 h-10 rounded-full bg-primary hover:bg-slate-900 text-white dark:bg-amber-500 dark:hover:bg-amber-600 dark:text-slate-900 flex items-center justify-center shadow-md active:scale-95 transition-transform shrink-0">
+              <span class="material-symbols-outlined text-lg">send</span>
+            </button>
+          </form>
+        </footer>
+
+      </section>
+
+    </main>
+
+    <!-- Navigation du Bas (Mobile) -->
+    <nav class="fixed bottom-0 left-0 right-0 w-full z-50 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-around items-center px-2 py-2 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.04)] md:hidden">
+      <a href="accueil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[9px] font-bold mt-0.5">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[9px] font-bold mt-0.5">Recherche</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center justify-center bg-primary/10 text-primary dark:bg-amber-500/10 dark:text-amber-500 rounded-full px-3 py-1">
+        <span class="material-symbols-outlined">forum</span>
+        <span class="text-[9px] font-bold mt-0.5">Messages</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[9px] font-bold mt-0.5">Publier</span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[9px] font-bold mt-0.5">Profil</span>
+      </a>
+    </nav>
+
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      const currentUser = Auth.currentUser();
+      let allMessages = [];
+      let groupedThreads = {};
+      let activeThreadKey = null; // format: 'partnerId_logementId'
+      let activePartnerId = null;
+      let activeLogementId = null;
+      let activeListingTitle = "";
+
+      // Load avatar header
+      const avatar = document.getElementById("user-avatar");
+      if (currentUser) {
+        if (currentUser.avatar_url) {
+          avatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatar.textContent = (currentUser.nom || currentUser.email || "U").charAt(0).toUpperCase();
+        }
+      }
+
+      // Check query parameters to start a discussion immediately
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryDest = urlParams.get('dest');
+      const queryLogement = urlParams.get('logement');
+
+      // Fetch and refresh thread listing periodically
+      async function chargerMessages(isAutoRefresh = false) {
+        try {
+          const messages = await Users.messages();
+          allMessages = messages;
+          
+          grouperEtAfficherMessages(isAutoRefresh);
+        } catch (err) {
+          console.error('[chargerMessages]', err);
+          if (!isAutoRefresh) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erreur',
+              text: 'Impossible de charger vos discussions.'
+            });
+          }
+        }
+      }
+
+      function grouperEtAfficherMessages(isAutoRefresh = false) {
+        // Grouping by listing and contact
+        const threads = {};
+        let unreadGlobal = 0;
+
+        allMessages.forEach(msg => {
+          const isSender = msg.expediteur.id === currentUser.id;
+          const partner = isSender ? msg.destinataire : msg.expediteur;
+          
+          if (!partner) return; // safety
+
+          const logement = msg.logements || { id: msg.logement_id, titre: "Logement non spécifié" };
+          const threadKey = `${partner.id}_${logement.id}`;
+
+          if (!threads[threadKey]) {
+            threads[threadKey] = {
+              partner,
+              logement,
+              messages: [],
+              unreadCount: 0,
+              lastMessage: null
+            };
+          }
+
+          threads[threadKey].messages.push(msg);
+
+          if (!msg.lu && msg.destinataire.id === currentUser.id) {
+            threads[threadKey].unreadCount++;
+            unreadGlobal++;
+          }
+        });
+
+        // Convert to array and sort by last message date
+        const sortedThreads = Object.values(threads).map(thread => {
+          // Sort messages in thread chronologically
+          thread.messages.sort((a, b) => new Date(a.cree_le) - new Date(b.cree_le));
+          thread.lastMessage = thread.messages[thread.messages.length - 1];
+          return thread;
+        });
+
+        sortedThreads.sort((a, b) => new Date(b.lastMessage.cree_le) - new Date(a.lastMessage.cree_le));
+
+        // Global unread badge
+        const badge = document.getElementById("global-unread-badge");
+        if (unreadGlobal > 0) {
+          badge.textContent = unreadGlobal;
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+
+        groupedThreads = threads;
+
+        // Render sidebar list
+        renderThreads(sortedThreads, isAutoRefresh);
+
+        // If there was an active thread, re-render chat container
+        if (activeThreadKey) {
+          renderChat(activeThreadKey, isAutoRefresh);
+        } else if (queryDest && queryLogement && !isAutoRefresh) {
+          // Auto initiate thread from query params
+          const queryKey = `${queryDest}_${queryLogement}`;
+          if (groupedThreads[queryKey]) {
+            selectionnerDiscussion(queryKey);
+          } else {
+            // New thread initiation
+            creerDiscussionVirtuelle(queryDest, queryLogement);
+          }
+        }
+      }
+
+      async function creerDiscussionVirtuelle(partnerId, logementId) {
+        document.getElementById("threads-skeleton").classList.add("hidden");
+        document.getElementById("threads-empty").classList.add("hidden");
+        document.getElementById("threads-list").classList.remove("hidden");
+
+        try {
+          // Get logement details
+          const log = await Logements.detail(logementId);
+          activeListingTitle = log.titre;
+          const owner = log.utilisateurs || {};
+
+          const virtualKey = `${partnerId}_${logementId}`;
+          groupedThreads[virtualKey] = {
+            partner: {
+              id: partnerId,
+              nom: owner.nom || "Propriétaire",
+              avatar_url: owner.avatar_url,
+              whatsapp: owner.whatsapp || log.whatsapp_contact
+            },
+            logement: {
+              id: logementId,
+              titre: log.titre
+            },
+            messages: [],
+            unreadCount: 0,
+            lastMessage: null,
+            isVirtual: true
+          };
+
+          // Render sidebar with virtual item inserted at the top
+          const listContainer = document.getElementById("threads-list");
+          const virtualItemHtml = generateThreadHtml(groupedThreads[virtualKey], virtualKey, true);
+          listContainer.innerHTML = virtualItemHtml + listContainer.innerHTML;
+
+          selectionnerDiscussion(virtualKey);
+        } catch (e) {
+          console.error(e);
+          Swal.fire({
+            icon: 'error',
+            title: 'Oups',
+            text: 'Logement introuvable.'
+          });
+        }
+      }
+
+      function generateThreadHtml(thread, key, isActive = false) {
+        const p = thread.partner;
+        const log = thread.logement;
+        const lastMsg = thread.lastMessage;
+        
+        let lastMsgText = "Aucun message. Envoyez une salutation !";
+        let dateText = "";
+        if (lastMsg) {
+          const isMe = lastMsg.expediteur.id === currentUser.id;
+          lastMsgText = (isMe ? "Vous : " : "") + lastMsg.contenu;
+          const d = new Date(lastMsg.cree_le);
+          dateText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        const initials = p.nom.charAt(0).toUpperCase();
+        const activeClass = isActive ? "bg-slate-100 dark:bg-slate-800/80 border-l-4 border-primary dark:border-amber-500" : "hover:bg-slate-50 dark:hover:bg-slate-800/40";
+
+        const badgeHtml = thread.unreadCount > 0 
+          ? `<span class="bg-primary dark:bg-amber-500 text-white dark:text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full">${thread.unreadCount}</span>` 
+          : "";
+
+        return `
+          <div onclick="selectionnerDiscussion('${key}')" data-key="${key}" class="p-4 flex items-center gap-3 cursor-pointer transition-colors duration-200 ${activeClass}">
+            <div class="relative flex-shrink-0">
+              <div class="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-700 dark:text-slate-200 overflow-hidden shadow-inner">
+                ${p.avatar_url ? `<img src="${p.avatar_url}" class="w-full h-full object-cover"/>` : initials}
+              </div>
+              ${p.whatsapp ? '<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full" title="WhatsApp connecté"></span>' : ''}
+            </div>
+            <div class="min-w-0 flex-1 space-y-0.5">
+              <div class="flex justify-between items-baseline">
+                <h4 class="font-semibold text-xs text-slate-900 dark:text-white truncate pr-2">${p.nom}</h4>
+                <span class="text-[10px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">${dateText}</span>
+              </div>
+              <p class="text-[10px] font-bold text-amber-600 dark:text-amber-400 truncate">${log.titre}</p>
+              <div class="flex justify-between items-center gap-2">
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate flex-1">${lastMsgText}</p>
+                ${badgeHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderThreads(sortedThreads, isAutoRefresh = false) {
+        document.getElementById("threads-skeleton").classList.add("hidden");
+        
+        const filterVal = document.getElementById("search-threads").value.trim().toLowerCase();
+
+        const filtered = sortedThreads.filter(thread => {
+          const name = thread.partner.nom.toLowerCase();
+          const title = thread.logement.titre.toLowerCase();
+          const lastMsg = thread.lastMessage ? thread.lastMessage.contenu.toLowerCase() : "";
+          return name.includes(filterVal) || title.includes(filterVal) || lastMsg.includes(filterVal);
+        });
+
+        if (filtered.length === 0) {
+          if (!activeThreadKey || !groupedThreads[activeThreadKey]?.isVirtual) {
+            document.getElementById("threads-empty").classList.remove("hidden");
+            document.getElementById("threads-list").classList.add("hidden");
+            return;
+          }
+        }
+
+        document.getElementById("threads-empty").classList.add("hidden");
+        const threadsList = document.getElementById("threads-list");
+        threadsList.classList.remove("hidden");
+
+        // Keep scroll position if refreshing
+        const oldScroll = threadsList.scrollTop;
+        
+        let html = "";
+        
+        // If there's an active virtual thread that hasn't written any real messages yet, prepend it
+        if (activeThreadKey && groupedThreads[activeThreadKey]?.isVirtual) {
+          html += generateThreadHtml(groupedThreads[activeThreadKey], activeThreadKey, true);
+        }
+
+        filtered.forEach(thread => {
+          // Avoid duplicating virtual thread
+          const key = `${thread.partner.id}_${thread.logement.id}`;
+          if (activeThreadKey === key && groupedThreads[activeThreadKey]?.isVirtual) return;
+
+          const isActive = key === activeThreadKey;
+          html += generateThreadHtml(thread, key, isActive);
+        });
+
+        threadsList.innerHTML = html;
+        if (isAutoRefresh) {
+          threadsList.scrollTop = oldScroll;
+        }
+      }
+
+      // Live search typing event
+      document.getElementById("search-threads").addEventListener("input", () => {
+        grouperEtAfficherMessages(true);
+      });
+
+      function backToThreads() {
+        document.getElementById("conversations-column").classList.remove("hidden");
+        document.getElementById("conversations-column").classList.add("w-full");
+        document.getElementById("chat-column").classList.add("hidden");
+      }
+
+      async function selectionnerDiscussion(key) {
+        activeThreadKey = key;
+        const thread = groupedThreads[key];
+        activePartnerId = thread.partner.id;
+        activeLogementId = thread.logement.id;
+        activeListingTitle = thread.logement.titre;
+
+        // Mobile responsive UI shift
+        if (window.innerWidth < 768) {
+          document.getElementById("conversations-column").classList.add("hidden");
+          document.getElementById("conversations-column").classList.remove("w-full");
+          document.getElementById("chat-column").classList.remove("hidden");
+        }
+
+        // Show chat column
+        document.getElementById("chat-column").classList.remove("hidden");
+        document.getElementById("no-chat-selected").classList.add("hidden");
+        document.getElementById("chat-header").classList.remove("hidden");
+        document.getElementById("chat-messages").classList.remove("hidden");
+        document.getElementById("chat-active-messages-container").classList.remove("hidden");
+        document.getElementById("chat-input-bar").classList.remove("hidden");
+
+        // Highlight active list item
+        document.querySelectorAll("#threads-list > div").forEach(el => {
+          el.classList.remove("bg-slate-100", "dark:bg-slate-800/80", "border-l-4", "border-primary", "dark:border-amber-500");
+          el.classList.add("hover:bg-slate-50", "dark:hover:bg-slate-800/40");
+        });
+        const selectedEl = document.querySelector(`[data-key="${key}"]`);
+        if (selectedEl) {
+          selectedEl.className = selectedEl.className.replace(/hover:bg-slate-50|dark:hover:bg-slate-800\/40/g, '');
+          selectedEl.classList.add("bg-slate-100", "dark:bg-slate-800/80", "border-l-4", "border-primary", "dark:border-amber-500");
+        }
+
+        // Configure Header Details
+        const partner = thread.partner;
+        const initials = partner.nom.charAt(0).toUpperCase();
+        const avatarBox = document.getElementById("chat-partner-avatar");
+        if (partner.avatar_url) {
+          avatarBox.innerHTML = `<img src="${partner.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatarBox.textContent = initials;
+        }
+        document.getElementById("chat-partner-name").textContent = partner.nom;
+        document.getElementById("chat-listing-title").textContent = thread.logement.titre;
+
+        // Action shortcuts buttons
+        document.getElementById("btn-view-listing").onclick = () => {
+          window.location.href = `details.html?id=${thread.logement.id}`;
+        };
+
+        // Call button
+        const btnCall = document.getElementById("btn-call-partner");
+        if (partner.whatsapp) {
+          btnCall.href = `tel:${partner.whatsapp}`;
+          btnCall.classList.remove("hidden");
+        } else {
+          btnCall.classList.add("hidden");
+        }
+
+        // WhatsApp button
+        const btnWa = document.getElementById("btn-wa-partner");
+        if (partner.whatsapp) {
+          const waNum = partner.whatsapp.replace(/[+\s]/g, '');
+          const text = encodeURIComponent(`Bonjour ${partner.nom}, je poursuis notre discussion Bukavu Housing au sujet de votre logement "${thread.logement.titre}".`);
+          btnWa.href = `https://wa.me/${waNum}?text=${text}`;
+          btnWa.classList.remove("hidden");
+        } else {
+          btnWa.classList.add("hidden");
+        }
+
+        // Render chat log
+        renderChat(key, false);
+
+        // Mark as read API
+        if (thread.unreadCount > 0 && !thread.isVirtual) {
+          try {
+            await Users.marquerMessagesLus(activePartnerId, activeLogementId);
+            thread.unreadCount = 0;
+            // Update thread list counts quickly client-side
+            const badgeEl = selectedEl ? selectedEl.querySelector('.bg-primary, .bg-amber-500') : null;
+            if (badgeEl) badgeEl.remove();
+            
+            // Recalculate global unread count
+            let newGlobalUnread = 0;
+            Object.values(groupedThreads).forEach(t => {
+              newGlobalUnread += t.unreadCount;
+            });
+            const globalBadge = document.getElementById("global-unread-badge");
+            if (newGlobalUnread > 0) {
+              globalBadge.textContent = newGlobalUnread;
+            } else {
+              globalBadge.classList.add("hidden");
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+
+      function renderChat(key, isAutoRefresh = false) {
+        const thread = groupedThreads[key];
+        if (!thread) return;
+
+        const chatBox = document.getElementById("chat-active-messages-container");
+        
+        // Detect if user is scrolled to the bottom before writing
+        const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 60;
+
+        let html = "";
+        
+        if (thread.messages.length === 0) {
+          html = `
+            <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400 dark:text-slate-500 my-auto">
+              <span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-700 mb-2">waving_hand</span>
+              <p class="text-xs font-semibold">Envoyez le premier message</p>
+              <p class="text-[10px] mt-0.5">Écrivez au propriétaire ci-dessous pour lancer l'échange sur "${activeListingTitle}".</p>
+            </div>
+          `;
+          chatBox.innerHTML = html;
+          return;
+        }
+
+        thread.messages.forEach(msg => {
+          const isMe = msg.expediteur.id === currentUser.id;
+          const d = new Date(msg.cree_le);
+          const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          if (isMe) {
+            html += `
+              <div class="flex flex-col items-end space-y-1">
+                <div class="max-w-[75%] md:max-w-[65%] bg-primary text-white dark:bg-amber-500 dark:text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-xs font-medium shadow-sm leading-relaxed whitespace-pre-wrap">
+                  ${escapeHtml(msg.contenu)}
+                </div>
+                <div class="flex items-center gap-1 px-1 text-[9px] text-slate-400 dark:text-slate-500">
+                  <span>${time}</span>
+                  <span class="material-symbols-outlined text-[12px] font-bold ${msg.lu ? 'text-primary dark:text-amber-500' : 'text-slate-300'}">done_all</span>
+                </div>
+              </div>
+            `;
+          } else {
+            html += `
+              <div class="flex flex-col items-start space-y-1">
+                <div class="max-w-[75%] md:max-w-[65%] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-100 px-4 py-2.5 rounded-2xl rounded-tl-none text-xs leading-relaxed whitespace-pre-wrap">
+                  ${escapeHtml(msg.contenu)}
+                </div>
+                <span class="px-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium">${time}</span>
+              </div>
+            `;
+          }
+        });
+
+        chatBox.innerHTML = html;
+
+        // Scroll to bottom if it was scrolled, or if it is a fresh manual chat selection
+        if (!isAutoRefresh || isScrolledToBottom) {
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+      }
+
+      async function envoyerMessageForm(event) {
+        event.preventDefault();
+        const input = document.getElementById("input-message");
+        const content = input.value.trim();
+        if (!content || !activePartnerId || !activeLogementId) return;
+
+        input.value = ""; // Clear input instantly
+
+        try {
+          const res = await Users.envoyerMessage(activePartnerId, activeLogementId, content);
+          
+          // If virtual, migrate it to a real thread
+          if (groupedThreads[activeThreadKey]?.isVirtual) {
+            groupedThreads[activeThreadKey].isVirtual = false;
+            groupedThreads[activeThreadKey].messages = [res];
+            groupedThreads[activeThreadKey].lastMessage = res;
+          } else {
+            groupedThreads[activeThreadKey].messages.push(res);
+            groupedThreads[activeThreadKey].lastMessage = res;
+          }
+
+          // Render active messages
+          renderChat(activeThreadKey, false);
+
+          // Force full messages update to sync sidebar list
+          await chargerMessages(true);
+        } catch (err) {
+          console.error('[envoyerMessage]', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: err.message || 'Impossible d\'envoyer le message.'
+          });
+        }
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Initial loads
+      chargerMessages();
+
+      // Set up Polling for Real-Time messages feel (every 4 seconds)
+      const pollingInterval = setInterval(() => {
+        chargerMessages(true);
+      }, 4000);
+
+      // Clean up interval on navigation if needed
+      window.addEventListener('beforeunload', () => {
+        clearInterval(pollingInterval);
+      });
+    </script>
+  </body>
+</html>

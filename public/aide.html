@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Centre d'Aide & FAQ — Bukavu Housing</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              background: "#f8f9ff",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+      /* FAQ animations */
+      .faq-answer {
+        transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+        overflow: hidden;
+        max-height: 0;
+      }
+      .faq-active .faq-answer {
+        max-height: 250px;
+        transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
+      }
+    </style>
+    <script>
+      // Initialisation immédiate du Dark Mode pour éviter le flash blanc
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-background text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans min-h-screen pb-24 transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800/80 w-full sticky top-0 z-40 shadow-sm flex justify-between items-center px-6 py-4 transition-colors duration-300">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='accueil.html'">
+        <span class="material-symbols-outlined text-primary dark:text-amber-500 text-3xl">home_work</span>
+        <h1 class="text-xl font-poppins font-bold text-primary dark:text-white">Bukavu Housing</h1>
+        <span class="text-xs text-primary dark:text-amber-500 font-bold bg-primary/10 dark:bg-amber-500/10 px-3 py-1 rounded-full ml-1">Bukavu</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white dark:bg-amber-500 dark:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer shadow-md overflow-hidden border-2 border-slate-100 dark:border-slate-800" onclick="window.location.href = 'profil.html'">
+          ?
+        </span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="max-w-3xl mx-auto px-6 py-10 space-y-12">
+      
+      <!-- Center Title and Search bar -->
+      <section class="text-center space-y-4">
+        <div class="flex justify-center gap-2 text-primary dark:text-amber-500">
+          <span class="material-symbols-outlined text-3xl">help_center</span>
+        </div>
+        <h2 class="text-3xl font-poppins font-black text-slate-900 dark:text-white tracking-tight">
+          Comment pouvons-nous vous aider ?
+        </h2>
+        
+        <!-- Live Search in FAQ -->
+        <div class="max-w-lg mx-auto relative mt-4">
+          <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+            <span class="material-symbols-outlined text-lg">search</span>
+          </span>
+          <input id="faq-search" type="text" placeholder="Rechercher une question ou un mot clé..." class="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary dark:focus:ring-amber-500 focus:border-transparent outline-none transition-all shadow-sm" oninput="filtrerFAQ()" />
+        </div>
+      </section>
+
+      <!-- Tutorial steps / Quick Guide -->
+      <section class="space-y-6">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary dark:text-amber-500">menu_book</span>
+          <h3 class="text-lg font-poppins font-bold text-slate-900 dark:text-white">Démarrage Rapide</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center space-y-2">
+            <div class="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-amber-500/10 dark:text-amber-500 flex items-center justify-center font-bold text-sm mx-auto">1</div>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white">Recherchez</h4>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">Tapez votre quartier favori (Ibanda, Nyalukemba...) et filtrez selon votre budget.</p>
+          </div>
+          <div class="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center space-y-2">
+            <div class="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-amber-500/10 dark:text-amber-500 flex items-center justify-center font-bold text-sm mx-auto">2</div>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white">Analysez</h4>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">Vérifiez les équipements, le badge de confiance, et visualisez la vidéo YouTube.</p>
+          </div>
+          <div class="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm text-center space-y-2">
+            <div class="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-amber-500/10 dark:text-amber-500 flex items-center justify-center font-bold text-sm mx-auto">3</div>
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white">Discutez</h4>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">Contactez directement par WhatsApp ou via le tchat interne pour planifier une visite.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ Accordion List -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary dark:text-amber-500">quiz</span>
+          <h3 class="text-lg font-poppins font-bold text-slate-900 dark:text-white">Questions Fréquentes (FAQ)</h3>
+        </div>
+
+        <div id="faq-list" class="space-y-3">
+          
+          <!-- FAQ 1 -->
+          <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all">
+            <button onclick="toggleFAQ(this)" class="w-full text-left p-4 flex justify-between items-center gap-4 text-slate-900 dark:text-white">
+              <span class="font-semibold text-xs md:text-sm">Combien coûte l'inscription et la publication sur Bukavu Housing ?</span>
+              <span class="material-symbols-outlined text-slate-400 shrink-0 transition-transform duration-200">expand_more</span>
+            </button>
+            <div class="faq-answer px-4 pb-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800/20 pt-3">
+              Bukavu Housing est <strong class="text-primary dark:text-amber-500">100% gratuit</strong> pour les chercheurs de logements et pour les propriétaires. Nous ne prenons aucune commission sur vos transactions ou baux de location. Notre but est de dynamiser l'écosystème numérique de Bukavu.
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all">
+            <button onclick="toggleFAQ(this)" class="w-full text-left p-4 flex justify-between items-center gap-4 text-slate-900 dark:text-white">
+              <span class="font-semibold text-xs md:text-sm">Comment fonctionne le badge "Propriétaire Vérifié" ?</span>
+              <span class="material-symbols-outlined text-slate-400 shrink-0 transition-transform duration-200">expand_more</span>
+            </button>
+            <div class="faq-answer px-4 pb-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800/20 pt-3">
+              Le badge vert s'active automatiquement dès que vous fournissez un numéro WhatsApp valide dans vos paramètres de profil. Ce numéro permet aux visiteurs de vous contacter en un clic avec un message pré-rempli. Les profils vérifiés bénéficient d'un meilleur classement dans les résultats de recherche.
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all">
+            <button onclick="toggleFAQ(this)" class="w-full text-left p-4 flex justify-between items-center gap-4 text-slate-900 dark:text-white">
+              <span class="font-semibold text-xs md:text-sm">Que faire si je suspecte une annonce frauduleuse ?</span>
+              <span class="material-symbols-outlined text-slate-400 shrink-0 transition-transform duration-200">expand_more</span>
+            </button>
+            <div class="faq-answer px-4 pb-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800/20 pt-3">
+              Allez directement sur la page de détails de l'annonce, descendez tout en bas de la fiche descriptive et cliquez sur le lien <strong class="text-red-500">"Signaler cette annonce"</strong>. Choisissez la raison du signalement (Faux logement, prix incorrect, etc.). Nos équipes de modération analysent et retirent les annonces suspectes dans les plus brefs délais.
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all">
+            <button onclick="toggleFAQ(this)" class="w-full text-left p-4 flex justify-between items-center gap-4 text-slate-900 dark:text-white">
+              <span class="font-semibold text-xs md:text-sm">Puis-je modifier ou supprimer mes annonces à tout moment ?</span>
+              <span class="material-symbols-outlined text-slate-400 shrink-0 transition-transform duration-200">expand_more</span>
+            </button>
+            <div class="faq-answer px-4 pb-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-50 dark:border-slate-800/20 pt-3">
+              Oui, absolument. Rendez-vous sur votre <strong class="text-primary dark:text-amber-500">Profil</strong>, onglet <strong class="text-slate-800 dark:text-white">"Mes annonces"</strong>. Vous pourrez modifier les informations, basculer le logement de "Disponible" à "Loué" pour cesser de recevoir des appels, ou supprimer définitivement le logement de la plateforme.
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Interactive Support Form -->
+      <section class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-lg space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary dark:text-amber-500">support_agent</span>
+          <h3 class="text-base font-poppins font-bold text-slate-950 dark:text-white">Contacter le support</h3>
+        </div>
+        <p class="text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
+          Vous rencontrez un bug technique ou avez une suggestion d'amélioration pour la ville de Bukavu ? Remplissez ce formulaire et notre équipe technique vous contactera.
+        </p>
+
+        <form id="support-form" onsubmit="envoyerFormSupport(event)" class="space-y-4 pt-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sujet de votre message</label>
+              <input id="support-sujet" type="text" required placeholder="Ex: Problème d'upload d'images" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Adresse email pour vous répondre</label>
+              <input id="support-email" type="email" required placeholder="Ex: contact@gmail.com" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description détaillée du problème</label>
+            <textarea id="support-description" rows="3" required placeholder="Décrivez au mieux ce que vous rencontrez comme problème..." class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none resize-none"></textarea>
+          </div>
+          <button type="submit" class="bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm transition-all hover:scale-[1.01]">
+            Envoyer ma requête au support
+          </button>
+        </form>
+      </section>
+
+    </main>
+
+    <!-- Bottom Mobile Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 w-full z-50 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-around items-center px-2 py-2 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+      <a href="accueil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[9px] font-bold mt-0.5">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[9px] font-bold mt-0.5">Recherche</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">forum</span>
+        <span class="text-[9px] font-bold mt-0.5">Messages</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[9px] font-bold mt-0.5">Publier</span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[9px] font-bold mt-0.5">Profil</span>
+      </a>
+    </nav>
+
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      // Top Avatar Setup
+      const currentUser = Auth.currentUser();
+      const avatar = document.getElementById("user-avatar");
+      if (currentUser) {
+        if (currentUser.avatar_url) {
+          avatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatar.textContent = (currentUser.nom || currentUser.email || "U").charAt(0).toUpperCase();
+        }
+      }
+
+      // FAQ accordion toggle logic
+      window.toggleFAQ = function(btn) {
+        const item = btn.closest(".faq-item");
+        const icon = btn.querySelector(".material-symbols-outlined");
+        const isActive = item.classList.contains("faq-active");
+
+        // Close all first for accordion effect
+        document.querySelectorAll(".faq-item").forEach(i => {
+          i.classList.remove("faq-active");
+          const ic = i.querySelector(".material-symbols-outlined");
+          if (ic) ic.style.transform = "rotate(0deg)";
+        });
+
+        if (!isActive) {
+          item.classList.add("faq-active");
+          icon.style.transform = "rotate(180deg)";
+        }
+      };
+
+      // Live search filter for FAQ
+      window.filtrerFAQ = function() {
+        const query = document.getElementById("faq-search").value.trim().toLowerCase();
+        document.querySelectorAll(".faq-item").forEach(item => {
+          const text = item.textContent.toLowerCase();
+          item.classList.toggle("hidden", query && !text.includes(query));
+        });
+      };
+
+      // SweetAlert2-powered support form submission
+      window.envoyerFormSupport = function(e) {
+        e.preventDefault();
+        
+        Swal.fire({
+          title: 'Envoi en cours...',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        setTimeout(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Message Envoyé !',
+            text: 'Votre message a bien été transmis au support Bukavu Housing. Notre équipe vous répondra dans les plus brefs délais à l\'adresse indiquée.',
+            confirmButtonColor: '#1a3a5c'
+          }).then(() => {
+            document.getElementById("support-form").reset();
+          });
+        }, 1000);
+      };
+    </script>
+  </body>
+</html>

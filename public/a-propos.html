@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>À Propos de Nous — Bukavu Housing</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              background: "#f8f9ff",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+    </style>
+    <script>
+      // Initialisation immédiate du Dark Mode pour éviter le flash blanc
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-background text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans min-h-screen pb-24 transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800/80 w-full sticky top-0 z-40 shadow-sm flex justify-between items-center px-6 py-4 transition-colors duration-300">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='accueil.html'">
+        <span class="material-symbols-outlined text-primary dark:text-amber-500 text-3xl">home_work</span>
+        <h1 class="text-xl font-poppins font-bold text-primary dark:text-white">Bukavu Housing</h1>
+        <span class="text-xs text-primary dark:text-amber-500 font-bold bg-primary/10 dark:bg-amber-500/10 px-3 py-1 rounded-full ml-1">Bukavu</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white dark:bg-amber-500 dark:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer shadow-md overflow-hidden border-2 border-slate-100 dark:border-slate-800" onclick="window.location.href = 'profil.html'">
+          ?
+        </span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="max-w-3xl mx-auto px-6 py-10 space-y-12">
+      
+      <!-- Intro Section -->
+      <section class="text-center space-y-4">
+        <h2 class="text-3xl md:text-4xl font-poppins font-extrabold text-primary dark:text-white tracking-tight">
+          La Révolution du Logement à <span class="text-amber-500 dark:text-amber-400">Bukavu</span>
+        </h2>
+        <p class="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+          Bukavu Housing est la première plateforme immobilière digitale haut de gamme dédiée à la ville de Bukavu. Nous simplifions la recherche et la publication de logements dans tous les quartiers de la ville.
+        </p>
+      </section>
+
+      <!-- Stats Grid (Interactive Counter) -->
+      <section class="grid grid-cols-3 gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl transition-all relative overflow-hidden">
+        <!-- background grid accents -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-2xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/5 dark:bg-primary/10 rounded-full blur-2xl"></div>
+
+        <div class="text-center space-y-1 relative">
+          <p id="stat-logements" class="text-2xl md:text-4xl font-poppins font-black text-primary dark:text-amber-500">0</p>
+          <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Logements</p>
+        </div>
+        <div class="text-center space-y-1 border-x border-slate-100 dark:border-slate-800 relative">
+          <p id="stat-quartiers" class="text-2xl md:text-4xl font-poppins font-black text-primary dark:text-amber-500">0</p>
+          <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Quartiers</p>
+        </div>
+        <div class="text-center space-y-1 relative">
+          <p id="stat-utilisateurs" class="text-2xl md:text-4xl font-poppins font-black text-primary dark:text-amber-500">0</p>
+          <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Membres</p>
+        </div>
+      </section>
+
+      <!-- Vision & Mission (Glassmorphic cards) -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 dark:bg-amber-500/10 flex items-center justify-center text-primary dark:text-amber-500">
+            <span class="material-symbols-outlined">visibility</span>
+          </div>
+          <h3 class="text-base font-poppins font-bold text-slate-950 dark:text-white">Notre Vision</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            Éliminer complètement les difficultés d'accès aux logements décents et transparents à Bukavu. Nous croyons en un marché immobilier de confiance, libéré des intermédiaires informels abusifs, où chaque transaction est sûre et directe.
+          </p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80 shadow-sm space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 dark:bg-amber-500/10 flex items-center justify-center text-primary dark:text-amber-500">
+            <span class="material-symbols-outlined">track_changes</span>
+          </div>
+          <h3 class="text-base font-poppins font-bold text-slate-950 dark:text-white">Notre Mission</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            Mettre à disposition des propriétaires, gestionnaires et chercheurs de biens de Bukavu des technologies modernes et fluides : géolocalisation, messagerie sécurisée, filtre avancé de loyer, et visites virtuelles en ligne.
+          </p>
+        </div>
+      </section>
+
+      <!-- Team Section -->
+      <section class="space-y-6">
+        <div class="border-t border-slate-100 dark:border-slate-800 pt-8 flex items-center gap-3">
+          <span class="material-symbols-outlined text-primary dark:text-amber-500">diversity_3</span>
+          <h3 class="text-xl font-poppins font-bold text-slate-900 dark:text-white">Nos Valeurs</h3>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 space-y-2">
+            <h4 class="font-bold text-xs text-primary dark:text-amber-500">Transparence</h4>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">Pas de frais cachés. Informations claires sur les loyers, charges et conditions.</p>
+          </div>
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 space-y-2">
+            <h4 class="font-bold text-xs text-primary dark:text-amber-500">Sécurité</h4>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">Modération des annonces et signalement réactif pour écarter les fausses offres.</p>
+          </div>
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800/50 space-y-2">
+            <h4 class="font-bold text-xs text-primary dark:text-amber-500">Bukavu d'Abord</h4>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">Une expertise locale sur les 3 communes : Ibanda, Kadutu et Bagira.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Mobile Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 w-full z-50 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-around items-center px-2 py-2 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+      <a href="accueil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[9px] font-bold mt-0.5">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[9px] font-bold mt-0.5">Recherche</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">forum</span>
+        <span class="text-[9px] font-bold mt-0.5">Messages</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[9px] font-bold mt-0.5">Publier</span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[9px] font-bold mt-0.5">Profil</span>
+      </a>
+    </nav>
+
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      // Top Avatar Setup
+      const currentUser = Auth.currentUser();
+      const avatar = document.getElementById("user-avatar");
+      if (currentUser) {
+        if (currentUser.avatar_url) {
+          avatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatar.textContent = (currentUser.nom || currentUser.email || "U").charAt(0).toUpperCase();
+        }
+      }
+
+      // Fetch Stats and animate counting
+      async function chargerStats() {
+        try {
+          const stats = await Logements.stats();
+          
+          animmerCompteur("stat-logements", stats.totalLogements || 0);
+          animmerCompteur("stat-quartiers", stats.totalQuartiers || 0);
+          animmerCompteur("stat-utilisateurs", stats.totalUsers || 0);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      function animmerCompteur(id, targetValue) {
+        const el = document.getElementById(id);
+        if (!el || targetValue === 0) {
+          if (el) el.textContent = targetValue;
+          return;
+        }
+
+        let current = 0;
+        const duration = 1200; // ms
+        const steps = Math.min(targetValue, 30);
+        const stepTime = duration / steps;
+        const increment = Math.ceil(targetValue / steps);
+
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= targetValue) {
+            el.textContent = targetValue;
+            clearInterval(timer);
+          } else {
+            el.textContent = current;
+          }
+        }, stepTime);
+      }
+
+      chargerStats();
+    </script>
+  </body>
+</html>

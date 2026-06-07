@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="fr" class="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Bukavu Housing — Mon Profil</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+      /* Transitions douces */
+      .tab-btn {
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800 dark:bg-surface-dark dark:text-slate-200 font-sans pb-24 transition-colors duration-300">
+    
+    <!-- En-tête -->
+    <header class="w-full top-0 sticky z-40 bg-white dark:bg-card-dark shadow-sm flex justify-between items-center px-6 py-4 transition-colors">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='accueil.html'">
+        <span class="material-symbols-outlined text-primary dark:text-amber-500 text-3xl">home_work</span>
+        <h1 class="text-xl font-poppins font-bold text-primary dark:text-white">Bukavu Housing</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs bg-primary/10 text-primary dark:bg-amber-500/10 dark:text-amber-500 px-3 py-1 rounded-full font-bold">Bukavu</span>
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      
+      <!-- Section Utilisateur -->
+      <section class="flex flex-col md:flex-row items-center gap-6 p-6 bg-white dark:bg-card-dark rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 relative transition-all">
+        <!-- Photo de profil avec caméra overlay -->
+        <div class="relative group cursor-pointer" onclick="triggerAvatarUpload()">
+          <div id="avatar-grand" class="w-24 h-24 rounded-full bg-primary text-white dark:bg-amber-500 flex items-center justify-center text-4xl font-bold border-4 border-slate-100 dark:border-slate-700 overflow-hidden shadow-md">
+            ?
+          </div>
+          <div class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-200">
+            <span class="material-symbols-outlined text-2xl">photo_camera</span>
+          </div>
+          <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="uploadAvatar(this)" />
+        </div>
+
+        <div class="text-center md:text-left flex-1 space-y-1">
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+            <h2 class="font-poppins font-bold text-2xl text-slate-900 dark:text-white" id="profil-nom">Chargement...</h2>
+            <span id="badge-verifie" class="hidden bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">verified</span> Vérifié
+            </span>
+          </div>
+          <p class="text-sm text-slate-500 dark:text-slate-400" id="profil-email">—</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500" id="profil-date-insc">—</p>
+          <div id="wa-link-container" class="hidden pt-1">
+            <a id="wa-link" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 font-bold hover:underline">
+              <span class="material-symbols-outlined text-sm">chat</span> WhatsApp Propriétaire
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Système d'onglets -->
+      <div class="border-b border-slate-200 dark:border-slate-800">
+        <div class="flex gap-4">
+          <button id="btn-tab-annonces" onclick="switchProfileTab('annonces')" class="tab-btn pb-3 text-sm font-bold border-b-2 border-primary dark:border-amber-500 text-primary dark:text-white">
+            Mes annonces
+          </button>
+          <button id="btn-tab-favoris" onclick="switchProfileTab('favoris')" class="tab-btn pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white">
+            Mes favoris
+          </button>
+          <button id="btn-tab-settings" onclick="switchProfileTab('settings')" class="tab-btn pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white">
+            Paramètres
+          </button>
+        </div>
+      </div>
+
+      <!-- Onglet MES ANNONCES -->
+      <div id="tab-content-annonces" class="space-y-4 tab-content">
+        <div class="flex justify-between items-center">
+          <h3 class="font-poppins font-bold text-lg text-slate-900 dark:text-white">Logements publiés</h3>
+          <a href="publier.html" class="bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-sm font-bold">add</span> Publier un logement
+          </a>
+        </div>
+
+        <div id="liste-annonces" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Skeletons -->
+          <div class="animate-pulse bg-white dark:bg-card-dark rounded-2xl h-44 border border-slate-100 dark:border-slate-800"></div>
+          <div class="animate-pulse bg-white dark:bg-card-dark rounded-2xl h-44 border border-slate-100 dark:border-slate-800"></div>
+        </div>
+
+        <div id="annonces-vide" class="hidden text-center py-12 bg-white dark:bg-card-dark rounded-3xl border border-slate-100 dark:border-slate-800">
+          <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-2">home_work</span>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Vous n'avez publié aucun logement pour le moment.</p>
+        </div>
+      </div>
+
+      <!-- Onglet MES FAVORIS -->
+      <div id="tab-content-favoris" class="space-y-4 tab-content hidden">
+        <h3 class="font-poppins font-bold text-lg text-slate-900 dark:text-white mb-2">Mes logements favoris</h3>
+        
+        <div id="liste-favoris" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Favoris grid loaded via JS -->
+        </div>
+
+        <div id="favoris-vide" class="hidden text-center py-12 bg-white dark:bg-card-dark rounded-3xl border border-slate-100 dark:border-slate-800">
+          <span class="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600 mb-2">favorite_border</span>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Votre liste de favoris est vide.</p>
+          <a href="resultats.html" class="mt-3 inline-block text-primary dark:text-amber-500 text-sm font-bold hover:underline">Explorer les offres</a>
+        </div>
+      </div>
+
+      <!-- Onglet PARAMÈTRES -->
+      <div id="tab-content-settings" class="space-y-6 tab-content hidden">
+        
+        <!-- Informations personnelles -->
+        <section class="bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+          <h4 class="font-poppins font-bold text-base text-primary dark:text-amber-500">Modifier mon profil</h4>
+          
+          <form id="form-edit-profil" onsubmit="saveProfil(event)" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nom complet *</label>
+                <input id="edit-nom" type="text" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Numéro WhatsApp *</label>
+                <input id="edit-whatsapp" type="tel" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Email de contact public</label>
+                <input id="edit-email-contact" type="email" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Téléphone secondaire</label>
+                <input id="edit-tel2" type="tel" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Bio / Courte description (Max 200 caractères)</label>
+              <textarea id="edit-bio" rows="2" maxlength="200" class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none resize-none"></textarea>
+            </div>
+            
+            <button type="submit" class="bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 px-6 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all">
+              Sauvegarder les modifications
+            </button>
+          </form>
+        </section>
+
+        <!-- Changement de mot de passe -->
+        <section class="bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+          <h4 class="font-poppins font-bold text-base text-primary dark:text-amber-500">Changer de mot de passe</h4>
+          
+          <form id="form-edit-password" onsubmit="savePassword(event)" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Ancien mot de passe</label>
+                <input id="pwd-ancien" type="password" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nouveau mot de passe</label>
+                <input id="pwd-nouveau" type="password" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Confirmer nouveau</label>
+                <input id="pwd-confirmer" type="password" required class="w-full border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-900 focus:ring-1 focus:ring-primary dark:focus:ring-amber-500 outline-none" />
+              </div>
+            </div>
+            
+            <button type="submit" class="bg-primary hover:bg-slate-950 text-white dark:bg-amber-500 dark:hover:bg-amber-600 px-6 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all">
+              Changer le mot de passe
+            </button>
+          </form>
+        </section>
+
+        <!-- Préférences d'affichage (Dark mode) -->
+        <section class="bg-white dark:bg-card-dark p-6 rounded-3xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div>
+            <h4 class="font-poppins font-bold text-base text-slate-900 dark:text-white">Mode sombre</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Activer le thème sombre pour économiser de la batterie ou réduire la fatigue visuelle.</p>
+          </div>
+          <button onclick="toggleDarkMode()" id="dark-mode-btn" class="w-12 h-6 rounded-full bg-slate-300 dark:bg-amber-500 relative flex items-center p-0.5 transition-colors duration-300">
+            <span class="w-5 h-5 bg-white rounded-full shadow-md transform translate-x-0 dark:translate-x-6 transition-transform duration-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[14px] text-slate-700" id="dark-mode-icon">light_mode</span>
+            </span>
+          </button>
+        </section>
+
+        <!-- Actions de compte -->
+        <section class="bg-red-50 dark:bg-red-950/20 p-6 rounded-3xl border border-red-200/50 dark:border-red-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h4 class="font-poppins font-bold text-base text-red-800 dark:text-red-400">Zone de danger</h4>
+            <p class="text-xs text-red-700 dark:text-red-400/80">La suppression du compte est définitive. Toutes vos données seront supprimées.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="deconnecter()" class="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">logout</span> Déconnexion
+            </button>
+            <button onclick="deleteAccount()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all">
+              Supprimer mon compte
+            </button>
+          </div>
+        </section>
+      </div>
+
+    </main>
+
+    <!-- Navigation fixe bottom -->
+    <nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-white dark:bg-card-dark shadow-[0_-4px_12px_rgba(0,0,0,0.06)] border-t border-slate-100 dark:border-slate-800 rounded-t-2xl transition-colors">
+      <a href="accueil.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[10px] font-semibold">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[10px] font-semibold">Recherche</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[10px] font-semibold">Publier</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-amber-500 px-3 py-1 relative">
+        <span class="material-symbols-outlined">mail</span>
+        <span class="text-[10px] font-semibold">Messages</span>
+        <span id="unread-messages-badge" class="hidden absolute top-0.5 right-4 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center text-primary dark:text-amber-500 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px] font-bold">Profil</span>
+      </a>
+    </nav>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      // Gestion du Dark Mode
+      const isDarkMode = localStorage.getItem('theme') === 'dark';
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+        updateDarkModeUI(true);
+      } else {
+        document.documentElement.classList.remove('dark');
+        updateDarkModeUI(false);
+      }
+
+      function toggleDarkMode() {
+        const dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        updateDarkModeUI(dark);
+      }
+
+      function updateDarkModeUI(isDark) {
+        const btn = document.getElementById('dark-mode-btn');
+        const icon = document.getElementById('dark-mode-icon');
+        if (isDark) {
+          icon.textContent = 'dark_mode';
+          icon.className = 'material-symbols-outlined text-[14px] text-amber-500';
+        } else {
+          icon.textContent = 'light_mode';
+          icon.className = 'material-symbols-outlined text-[14px] text-slate-700';
+        }
+      }
+
+      // Initialiser les données du profil
+      let profilData = null;
+
+      async function init() {
+        try {
+          profilData = await Users.profil();
+          const { user, annonces, favoris } = profilData;
+
+          // Initiales avatar
+          const initiale = (user.nom || user.email || "U").charAt(0).toUpperCase();
+          const avatarEl = document.getElementById("avatar-grand");
+          if (user.avatar_url) {
+            avatarEl.innerHTML = `<img src="${user.avatar_url}" class="w-full h-full object-cover"/>`;
+          } else {
+            avatarEl.textContent = initiale;
+          }
+
+          // Remplir informations textuelles
+          document.getElementById("profil-nom").textContent = user.nom || "Utilisateur";
+          document.getElementById("profil-email").textContent = user.email || "";
+          
+          if (user.cree_le) {
+            const dateStr = new Date(user.cree_le).toLocaleDateString('fr-FR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+            document.getElementById("profil-date-insc").textContent = `Membre depuis le ${dateStr}`;
+          }
+
+          // Badge vérifié
+          if (user.whatsapp) {
+            document.getElementById("badge-verifie").classList.remove("hidden");
+            document.getElementById("wa-link-container").classList.remove("hidden");
+            document.getElementById("wa-link").href = `https://wa.me/${user.whatsapp.replace('+', '')}`;
+          } else {
+            document.getElementById("badge-verifie").classList.add("hidden");
+            document.getElementById("wa-link-container").classList.add("hidden");
+          }
+
+          // Pré-remplir les champs éditables
+          document.getElementById("edit-nom").value = user.nom || "";
+          document.getElementById("edit-whatsapp").value = user.whatsapp || "";
+          document.getElementById("edit-email-contact").value = user.email_contact || "";
+          document.getElementById("edit-tel2").value = user.telephone2 || "";
+          document.getElementById("edit-bio").value = user.bio || "";
+
+          // Charger les listes
+          afficherAnnonces(annonces);
+          afficherFavoris(favoris);
+
+          // Compteur messages non lus
+          verifierMessagesNonLus();
+        } catch (e) {
+          console.error(e);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: 'Impossible de charger les données du profil.'
+          });
+        }
+      }
+
+      async function verifierMessagesNonLus() {
+        try {
+          const messages = await Users.messages();
+          const userObj = Auth.currentUser();
+          const unread = messages.some(m => !m.lu && m.destinataire.id === userObj.id);
+          document.getElementById("unread-messages-badge").classList.toggle("hidden", !unread);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      // Tab switcher
+      window.switchProfileTab = function(tab) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.className = 'tab-btn pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-white';
+        });
+        
+        const activeBtn = document.getElementById(`btn-tab-${tab}`);
+        activeBtn.className = 'tab-btn pb-3 text-sm font-bold border-b-2 border-primary dark:border-amber-500 text-primary dark:text-white';
+      };
+
+      // Déclencheur input de photo de profil
+      window.triggerAvatarUpload = function() {
+        document.getElementById("avatar-file-input").click();
+      };
+
+      // Upload de la photo de profil
+      window.uploadAvatar = async function(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        
+        // Preview immédiat local
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById("avatar-grand").innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover"/>`;
+        };
+        reader.readAsDataURL(file);
+
+        // Feedback chargement
+        Swal.fire({
+          title: 'Mise à jour de l\'avatar...',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+          const fd = new FormData();
+          fd.append('avatar', file);
+          const updatedUser = await Users.changerAvatar(fd);
+          
+          // Sauvegarder user mis à jour en localStorage
+          Auth.me().then(res => {
+            setUser(res.user);
+          }).catch(() => {});
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Avatar mis à jour !',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: err.message || 'Échec lors de l\'upload.'
+          });
+          init(); // Reset à l'ancien avatar
+        }
+      };
+
+      // Sauvegarder modifications textuelles du profil
+      window.saveProfil = async function(e) {
+        e.preventDefault();
+        const data = {
+          nom: document.getElementById("edit-nom").value.trim(),
+          whatsapp: document.getElementById("edit-whatsapp").value.trim(),
+          email_contact: document.getElementById("edit-email-contact").value.trim(),
+          telephone2: document.getElementById("edit-tel2").value.trim(),
+          bio: document.getElementById("edit-bio").value.trim(),
+        };
+
+        const phoneRegex = /^(?:\+243|0)[0-9]{9}$/;
+        if (!phoneRegex.test(data.whatsapp)) {
+          return Swal.fire({
+            icon: 'error',
+            title: 'WhatsApp',
+            text: 'Le numéro WhatsApp doit commencer par +243 ou 0 suivi de 9 chiffres.'
+          });
+        }
+        if (data.telephone2 && !phoneRegex.test(data.telephone2)) {
+          return Swal.fire({
+            icon: 'error',
+            title: 'Téléphone secondaire',
+            text: 'Le téléphone secondaire doit commencer par +243 ou 0 suivi de 9 chiffres.'
+          });
+        }
+
+        Swal.fire({
+          title: 'Enregistrement...',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+          const updatedUser = await Users.mettreAJour(data);
+          setUser(updatedUser);
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Profil sauvegardé !',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            init(); // Re-render local information
+          });
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: err.message || 'Impossible de sauvegarder.'
+          });
+        }
+      };
+
+      // Changer mot de passe
+      window.savePassword = async function(e) {
+        e.preventDefault();
+        const ancien = document.getElementById("pwd-ancien").value;
+        const nouveau = document.getElementById("pwd-nouveau").value;
+        const confirmer = document.getElementById("pwd-confirmer").value;
+
+        if (nouveau.length < 8) {
+          return Swal.fire({
+            icon: 'error',
+            title: 'Sécurité',
+            text: 'Le nouveau mot de passe doit faire au moins 8 caractères.'
+          });
+        }
+        if (nouveau !== confirmer) {
+          return Swal.fire({
+            icon: 'error',
+            title: 'Confirmation',
+            text: 'La confirmation ne correspond pas au nouveau mot de passe.'
+          });
+        }
+
+        Swal.fire({
+          title: 'Modification du mot de passe...',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        try {
+          await Users.changerMotDePasse(ancien, nouveau);
+          document.getElementById("form-edit-password").reset();
+          Swal.fire({
+            icon: 'success',
+            title: 'Mot de passe modifié !',
+            text: 'Votre mot de passe a bien été mis à jour.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: err.message || 'Modification refusée.'
+          });
+        }
+      };
+
+      // Supprimer le compte
+      window.deleteAccount = async function() {
+        const confirm1 = await Swal.fire({
+          title: 'Supprimer votre compte ?',
+          text: 'Cette action est irréversible. Toutes vos annonces, favoris et messages seront effacés.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Oui, continuer',
+          cancelButtonText: 'Annuler'
+        });
+
+        if (confirm1.isConfirmed) {
+          const confirm2 = await Swal.fire({
+            title: 'Êtes-vous absolument sûr ?',
+            text: 'Tapez "SUPPRIMER" pour valider la fermeture définitive de votre compte Bukavu Housing.',
+            input: 'text',
+            inputPlaceholder: 'SUPPRIMER',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Supprimer définitivement',
+            cancelButtonText: 'Annuler'
+          });
+
+          if (confirm2.isConfirmed && confirm2.value === 'SUPPRIMER') {
+            Swal.fire({
+              title: 'Suppression en cours...',
+              allowOutsideClick: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+              await Users.supprimerCompte();
+              Auth.logout();
+            } catch (err) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: err.message || 'Impossible de supprimer votre compte.'
+              });
+            }
+          } else if (confirm2.isConfirmed) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Saisie incorrecte',
+              text: 'La suppression a été annulée car le mot clé n\'a pas été correctement saisi.'
+            });
+          }
+        }
+      };
+
+      // Déconnexion
+      window.deconnecter = async function() {
+        const confirm = await Swal.fire({
+          title: 'Déconnexion',
+          text: 'Voulez-vous vraiment vous déconnecter ?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#1a3a5c',
+          confirmButtonText: 'Oui, me déconnecter',
+          cancelButtonText: 'Rester connecté'
+        });
+
+        if (confirm.isConfirmed) {
+          Auth.logout();
+        }
+      };
+
+      // Rendre les annonces
+      function afficherAnnonces(annonces) {
+        const container = document.getElementById("liste-annonces");
+        const vide = document.getElementById("annonces-vide");
+
+        if (!annonces || annonces.length === 0) {
+          container.innerHTML = "";
+          vide.classList.remove("hidden");
+          return;
+        }
+
+        vide.classList.add("hidden");
+        container.innerHTML = "";
+        annonces.forEach((log) => {
+          const img = log.images?.[0] || "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=120";
+          const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF");
+          
+          container.innerHTML += `
+            <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex gap-4 hover:shadow-md transition-shadow">
+              <img src="${img}" class="w-24 h-20 rounded-xl object-cover flex-none bg-slate-100 dark:bg-slate-800" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=120'"/>
+              <div class="flex-1 min-w-0 flex flex-col justify-between">
+                <div>
+                  <h4 class="font-poppins font-bold text-sm text-slate-900 dark:text-white truncate">${log.titre}</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">${log.quartier} • ${prix}/mois</p>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[12px]">visibility</span> ${log.vues || 0} vue(s)
+                  </p>
+                </div>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button onclick="toggleAvailability('${log.id}', ${log.disponible})" class="text-xs font-bold text-slate-500 hover:text-primary dark:hover:text-amber-500 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full ${log.disponible ? 'bg-green-500' : 'bg-red-500'}"></span>
+                    ${log.disponible ? 'Disponible' : 'Loué'}
+                  </button>
+                  <div class="flex gap-2">
+                    <button onclick="window.location.href='publier.html?edit=${log.id}'" class="p-1.5 rounded-lg text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800" title="Modifier">
+                      <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                    <button onclick="deleteListing('${log.id}')" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20" title="Supprimer">
+                      <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        });
+      }
+
+      // Modifier statut logement (Disponible / Loué)
+      window.toggleAvailability = async function(id, currentStatus) {
+        try {
+          await Logements.modifier(id, { disponible: !currentStatus });
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: 'success',
+            title: 'Statut du logement mis à jour !'
+          });
+          init();
+        } catch (err) {
+          Swal.fire({ icon: 'error', title: 'Erreur', text: err.message });
+        }
+      };
+
+      // Supprimer un logement
+      window.deleteListing = async function(id) {
+        const confirm = await Swal.fire({
+          title: 'Supprimer ce logement ?',
+          text: 'Cette action est irréversible.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Oui, supprimer',
+          cancelButtonText: 'Annuler'
+        });
+
+        if (confirm.isConfirmed) {
+          Swal.fire({
+            title: 'Suppression en cours...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+          try {
+            await Logements.supprimer(id);
+            Swal.fire({
+              icon: 'success',
+              title: 'Supprimé !',
+              text: 'Le logement a bien été retiré de la plateforme.',
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              init();
+            });
+          } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Erreur', text: err.message });
+          }
+        }
+      };
+
+      // Rendre les favoris
+      function afficherFavoris(favoris) {
+        const container = document.getElementById("liste-favoris");
+        const vide = document.getElementById("favoris-vide");
+
+        if (!favoris || favoris.length === 0) {
+          container.innerHTML = "";
+          vide.classList.remove("hidden");
+          return;
+        }
+
+        vide.classList.add("hidden");
+        container.innerHTML = "";
+        favoris.forEach((log) => {
+          const img = log.images?.[0] || "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400";
+          const prix = log.prix.toLocaleString("fr-CD") + " " + (log.devise || "CDF");
+          
+          container.innerHTML += `
+            <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col hover:-translate-y-1 transition-all duration-300 relative group">
+              <div class="relative aspect-[4/3] w-full cursor-pointer" onclick="window.location.href='details.html?id=${log.id}'">
+                <img src="${img}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400'"/>
+                <div class="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur px-2.5 py-1 rounded-lg text-xs font-bold text-primary dark:text-amber-500 shadow-sm">
+                  ${prix}/mois
+                </div>
+                <button onclick="event.stopPropagation(); removeFavorite('${log.id}')" class="absolute top-3 right-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur p-2 rounded-full text-red-500 shadow-sm active:scale-90 transition-transform">
+                  <span class="material-symbols-outlined text-[18px] font-bold" style="font-variation-settings:'FILL' 1">favorite</span>
+                </button>
+              </div>
+              <div class="p-3 space-y-1 cursor-pointer flex-1 flex flex-col justify-between" onclick="window.location.href='details.html?id=${log.id}'">
+                <div>
+                  <h4 class="font-poppins font-bold text-sm text-slate-900 dark:text-white truncate">${log.titre}</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-xs">location_on</span>${log.quartier}, Bukavu
+                  </p>
+                </div>
+                <div class="flex gap-3 pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400">
+                  <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-sm text-primary dark:text-amber-500">bed</span> ${log.chambres || 1} Ch.</span>
+                  <span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-sm text-primary dark:text-amber-500">square_foot</span> ${log.superficie || '?'} m²</span>
+                </div>
+              </div>
+            </div>`;
+        });
+      }
+
+      // Retirer des favoris
+      window.removeFavorite = async function(id) {
+        try {
+          await Users.toggleFavori(id);
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: 'success',
+            title: 'Retiré de vos favoris !'
+          });
+          init();
+        } catch (err) {
+          Swal.fire({ icon: 'error', title: 'Erreur', text: err.message });
+        }
+      };
+
+      init();
+    </script>
+  </body>
+</html>

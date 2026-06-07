@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+    <title>Conditions Générales d'Utilisation — Bukavu Housing</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1a3a5c",
+              accent: "#d4903b",
+              background: "#f8f9ff",
+              "surface-dark": "#0f172a",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              poppins: ["Poppins", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      }
+      body {
+        min-height: 100dvh;
+      }
+    </style>
+    <script>
+      // Initialisation immédiate du Dark Mode pour éviter le flash blanc
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+  </head>
+  <body class="bg-background text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans min-h-screen pb-24 transition-colors duration-300">
+    
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800/80 w-full sticky top-0 z-40 shadow-sm flex justify-between items-center px-6 py-4 transition-colors duration-300">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='accueil.html'">
+        <span class="material-symbols-outlined text-primary dark:text-amber-500 text-3xl">home_work</span>
+        <h1 class="text-xl font-poppins font-bold text-primary dark:text-white">Bukavu Housing</h1>
+        <span class="text-xs text-primary dark:text-amber-500 font-bold bg-primary/10 dark:bg-amber-500/10 px-3 py-1 rounded-full ml-1">Bukavu</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="user-avatar" class="w-10 h-10 rounded-full bg-primary text-white dark:bg-amber-500 dark:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer shadow-md overflow-hidden border-2 border-slate-100 dark:border-slate-800" onclick="window.location.href = 'profil.html'">
+          ?
+        </span>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="max-w-3xl mx-auto px-6 py-10 space-y-10">
+      
+      <!-- Top Title -->
+      <section class="space-y-3">
+        <div class="flex items-center gap-2 text-primary dark:text-amber-500">
+          <span class="material-symbols-outlined">gavel</span>
+          <p class="text-xs font-bold uppercase tracking-widest">Mentions Légales & CGU</p>
+        </div>
+        <h2 class="text-3xl font-poppins font-black text-slate-900 dark:text-white">
+          Charte d'Utilisation & Conditions Générales
+        </h2>
+        <p class="text-xs text-slate-400 dark:text-slate-500">Dernière mise à jour : 7 Juin 2026</p>
+      </section>
+
+      <!-- Sections list -->
+      <div class="space-y-8 divide-y divide-slate-100 dark:divide-slate-800/60">
+        
+        <!-- 1. Acceptation des conditions -->
+        <section class="space-y-3 pt-6 first:pt-0 border-0">
+          <h3 class="text-lg font-poppins font-bold text-primary dark:text-amber-500">1. Acceptation des Conditions</h3>
+          <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            En créant un compte ou en accédant aux services de Bukavu Housing, vous acceptez pleinement et sans réserve les présentes Conditions Générales d'Utilisation. Si vous n'acceptez pas ces conditions, vous devez cesser l'utilisation de nos services.
+          </p>
+        </section>
+
+        <!-- 2. Règles de Publication d'Annonces -->
+        <section class="space-y-3 pt-6">
+          <h3 class="text-lg font-poppins font-bold text-primary dark:text-amber-500">2. Charte de Publication d'Annonces</h3>
+          <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Pour maintenir un niveau de qualité exceptionnel et garantir la sécurité de nos utilisateurs à Bukavu, toute publication d'annonce doit respecter les règles strictes suivantes :
+          </p>
+          <ul class="list-disc pl-5 text-xs space-y-2 text-slate-500 dark:text-slate-400">
+            <li><strong class="text-slate-800 dark:text-white">Réalité du Logement :</strong> Le logement proposé doit exister physiquement, être localisé dans l'un des quartiers réels de Bukavu, et correspondre exactement à la description et aux photos fournies.</li>
+            <li><strong class="text-slate-800 dark:text-white">Photos de qualité (max 8) :</strong> Les photos téléversées doivent être claires et ne pas contenir de filigranes ou de logos concurrents. Le système limite la publication à un maximum de 8 photos compressées par annonce.</li>
+            <li><strong class="text-slate-800 dark:text-white">Prix Transparent :</strong> Le prix du loyer doit être exprimé de façon réaliste en CDF ou USD par mois. Tout prix factice ou trompeur entraînera le retrait immédiat de l'annonce.</li>
+            <li><strong class="text-slate-800 dark:text-white">Vérification WhatsApp obligatoire :</strong> Afin d'obtenir le badge de confiance "Propriétaire Vérifié", vous devez fournir un numéro de téléphone WhatsApp valide au format correct (+243 ou 0 suivi de 9 chiffres).</li>
+          </ul>
+        </section>
+
+        <!-- 3. Signalements & Modération -->
+        <section class="space-y-3 pt-6">
+          <h3 class="text-lg font-poppins font-bold text-primary dark:text-amber-500">3. Signalements, Abus & Modération</h3>
+          <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Bukavu Housing dispose d'un système de signalement interactif. Si une annonce s'avère mensongère, frauduleuse ou indécente, les visiteurs peuvent la signaler en un clic. Nos modérateurs analysent ces rapports sous 24 heures et se réservent le droit de :
+          </p>
+          <ul class="list-disc pl-5 text-xs space-y-1.5 text-slate-500 dark:text-slate-400">
+            <li>Retirer temporairement ou définitivement l'annonce incriminée.</li>
+            <li>Restreindre ou suspendre les droits de publication de l'auteur.</li>
+            <li>Supprimer définitivement le compte utilisateur en cas de récidive ou d'arnaque avérée.</li>
+          </ul>
+        </section>
+
+        <!-- 4. Données Personnelles & Confidentialité -->
+        <section class="space-y-3 pt-6">
+          <h3 class="text-lg font-poppins font-bold text-primary dark:text-amber-500">4. Confidentialité des Données</h3>
+          <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Nous accordons une importance primordiale à la protection de vos données personnelles :
+          </p>
+          <ul class="list-disc pl-5 text-xs space-y-1.5 text-slate-500 dark:text-slate-400">
+            <li>Vos coordonnées (téléphone, email, WhatsApp) ne sont publiées sur vos fiches d'annonces que si vous cochez explicitement l'option de visibilité publique de vos contacts lors de l'enregistrement.</li>
+            <li>Dans le cas contraire, les visiteurs ne peuvent communiquer avec vous que via notre système de messagerie interne sécurisé.</li>
+            <li>Vous conservez le droit absolu de supprimer l'intégralité de vos données de façon définitive et instantanée à partir de vos paramètres de profil.</li>
+          </ul>
+        </section>
+
+        <!-- 5. Responsabilité -->
+        <section class="space-y-3 pt-6">
+          <h3 class="text-lg font-poppins font-bold text-primary dark:text-amber-500">5. Limitation de Responsabilité</h3>
+          <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            Bukavu Housing agit en tant que plateforme de mise en relation directe. Nous ne prenons pas de commissions et ne participons pas à la rédaction des contrats de bail physiques. En conséquence, la plateforme ne saurait être tenue pour responsable des litiges nés de la signature d'un bail, de défauts de paiement ou de dégradations matérielles du logement.
+          </p>
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- Bottom Mobile Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 w-full z-50 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-around items-center px-2 py-2 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+      <a href="accueil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">home</span>
+        <span class="text-[9px] font-bold mt-0.5">Accueil</span>
+      </a>
+      <a href="resultats.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">search</span>
+        <span class="text-[9px] font-bold mt-0.5">Recherche</span>
+      </a>
+      <a href="mes-messages.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">forum</span>
+        <span class="text-[9px] font-bold mt-0.5">Messages</span>
+      </a>
+      <a href="publier.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="text-[9px] font-bold mt-0.5">Publier</span>
+      </a>
+      <a href="profil.html" class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[9px] font-bold mt-0.5">Profil</span>
+      </a>
+    </nav>
+
+    <script src="api.js"></script>
+    <script>
+      Auth.requireAuth();
+
+      // Top Avatar Setup
+      const currentUser = Auth.currentUser();
+      const avatar = document.getElementById("user-avatar");
+      if (currentUser) {
+        if (currentUser.avatar_url) {
+          avatar.innerHTML = `<img src="${currentUser.avatar_url}" class="w-full h-full object-cover"/>`;
+        } else {
+          avatar.textContent = (currentUser.nom || currentUser.email || "U").charAt(0).toUpperCase();
+        }
+      }
+    </script>
+  </body>
+</html>
