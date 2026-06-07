@@ -8,10 +8,6 @@
     {
       "source": "/",
       "destination": "/accueil.html"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/api/index.js"
     }
   ]
 }
