@@ -8,10 +8,10 @@ const { body, validationResult } = require('express-validator');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '949504014260-2eb7v31tpl1ci0vui64n2v15o89791dj.apps.googleusercontent.com');
 
 function genToken(userId) {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ userId }, process.env.JWT_SECRET || 'X7mQ!9vLp2Rz#Kc8Nw4Tg@Yf6JhDs1BaE5uMn3Px', { expiresIn: '30d' });
 }
 
 // Configuration de Nodemailer pour l'envoi de mail de réinitialisation

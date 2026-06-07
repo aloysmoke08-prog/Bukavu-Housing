@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'X7mQ!9vLp2Rz#Kc8Nw4Tg@Yf6JhDs1BaE5uMn3Px');
     const { data: user, error } = await supabaseAdmin
       .from('utilisateurs')
       .select('id, nom, email, whatsapp, telephone, telephone2, email_contact, avatar_url, bio, verifie')
@@ -37,7 +37,7 @@ const authOptional = async (req, res, next) => {
   }
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'X7mQ!9vLp2Rz#Kc8Nw4Tg@Yf6JhDs1BaE5uMn3Px');
     const { data: user } = await supabaseAdmin
       .from('utilisateurs')
       .select('id, nom, email')
