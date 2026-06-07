@@ -199,15 +199,10 @@
 
       // 1. Gestionnaire du diaporama de fonds d'écran de Bukavu (rotation toutes les 2 min)
       const bgImages = [
-        'image/image.png',
-        'image/image_1.png',
-        'image/image_2.png',
-        'image/image_3.png',
-        // Fallbacks Unsplash
-        'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=1600&q=80',
-        'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&q=80',
-        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1600&q=80',
-        'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600&q=80'
+        'images/bukavu1.jpg',
+        'images/bukavu2.jpg',
+        'images/bukavu3.jpg',
+        'images/bukavu4.jpg'
       ];
       let currentBgIdx = 0;
       const bg1 = document.getElementById('bg-1');
@@ -230,7 +225,7 @@
         const firstUrl = bgImages[currentBgIdx];
         testImage(firstUrl, (success) => {
           if (success) setBgImage(bg1, firstUrl);
-          else setBgImage(bg1, bgImages[4]); // fallback par défaut
+          else setBgImage(bg1, bgImages[0]); // fallback par défaut
         });
       }
       initBackground();
@@ -242,7 +237,7 @@
         const nextBgEl = activeBgEl === bg1 ? bg2 : bg1;
 
         testImage(nextUrl, (success) => {
-          const finalUrl = success ? nextUrl : bgImages[4 + (currentBgIdx % 4)];
+          const finalUrl = success ? nextUrl : bgImages[currentBgIdx % bgImages.length];
           setBgImage(nextBgEl, finalUrl);
           
           nextBgEl.style.opacity = '1';
